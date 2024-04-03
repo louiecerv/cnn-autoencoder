@@ -152,30 +152,29 @@ def app():
         train_acc = history.history['accuracy']
         val_acc = history.history['val_accuracy']
 
-        # Create the figure and axes
-        fig, ax1 = plt.subplots()
+        # Create the figure with two side-by-side subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))  # Adjust figsize for better visualization
 
-        # Plot loss on primary axis (ax1)
+        # Plot loss on the first subplot (ax1)
         ax1.plot(train_loss, label='Training Loss')
         ax1.plot(val_loss, label='Validation Loss')
-
-        # Create a twin axis for accuracy (ax2)
-        ax2 = ax1.twinx()
-
-        # Plot accuracy on the twin axis (ax2)
-        ax2.plot(train_acc, 'g--', label='Training Accuracy')
-        ax2.plot(val_acc, 'r--', label='Validation Accuracy')
-
-        # Set labels and title
         ax1.set_xlabel('Epoch')
         ax1.set_ylabel('Loss')
-        ax2.set_ylabel('Accuracy')
-        fig.suptitle('Training and Validation Loss & Accuracy')
+        ax1.legend()
 
-        # Add legends
-        ax1.legend(loc='upper left')
-        ax2.legend(loc='upper right') 
+        # Plot accuracy on the second subplot (ax2)
+        ax2.plot(train_acc, 'g--', label='Training Accuracy')
+        ax2.plot(val_acc, 'r--', label='Validation Accuracy')
+        ax2.set_xlabel('Epoch')
+        ax2.set_ylabel('Accuracy')
+        ax2.legend()
+
+        # Set the main title (optional)
+        fig.suptitle('Training and Validation Performance')
+
+        plt.tight_layout()  # Adjust spacing between subplots
         st.pyplot(fig)   
+ 
 
         # update the progress bar
         for i in range(100):
