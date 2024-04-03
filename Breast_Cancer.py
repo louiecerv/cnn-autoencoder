@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_breast_cancer
 
 import time
 
@@ -40,18 +41,18 @@ def app():
     West Visayas State University"""
     st.text(text)
 
-    st.image('heart-disease.jpg', caption="Heart Disease Diagnosis using MLP-ANN")
+    st.image('breast-cancer.jpg', caption="Breast Cancer Dataset")
 
-    text = """
-    This Streamlit app leverages various classifiers to predict the presence or absence of 
-    heart disease based on the input of various heart symptoms. The data used to train 
-    the model comes from the heart disease dataset 
-    [https://www.kaggle.com/datasets/johnsmith88/heart-disease-dataset].
-    \nFactors such as chest pain, blood pressure, and cholesterol, 
-    are predictors that can estimate the likelihood of having heart disease.
-    \nDisclaimer: This app is for informational purposes only and should not be 
-    used for definitive medical diagnosis. 
-    Please consult a healthcare professional for any concerns about your heart health.
+    text = """he breast cancer dataset in scikit-learn is a well-known dataset used for binary 
+        classification tasks. It contains data collected from patients diagnosed with breast cancer. 
+        Here's a breakdown of the dataset:
+        \nSource: The data consists of features extracted from digitized images of fine needle 
+        aspirates (FNA) of breast masses.
+        \nFeatures: The dataset includes 569 data points, each with 30 numerical features. 
+        These features represent various characteristics of the cell nuclei, such as radius, 
+        texture, perimeter, and area.
+        \nTarget: The target variable indicates the class, whether the tumor is malignant 
+        (cancerous) or benign (non-cancerous). There are 212 malignant cases and 357 benign cases
     """
     st.write(text)
 
@@ -88,31 +89,20 @@ def app():
 
     st.write(text)
 
-    text = """This data set dates from 1988 and consists of four databases: 
-    Cleveland, Hungary, Switzerland, and Long Beach V. It contains 76 attributes, 
-    including the predicted attribute, but all published experiments 
-    refer to using a subset of 14 of them. The "target" variable refers to the 
-    presence of heart disease in the patient. It is integer valued 0 = no 
-    disease and 1 = disease.
-    \nAttribute Information:
+    # Load the iris dataset
+    data = load_breast_cancer()
 
-    age
-    sex
-    chest pain type (4 values)
-    resting blood pressure
-    serum cholestoral in mg/dl
-    fasting blood sugar > 120 mg/dl
-    resting electrocardiographic results (values 0,1,2)
-    maximum heart rate achieved
-    exercise induced angina
-    oldpeak = ST depression induced by exercise relative to rest
-    the slope of the peak exercise ST segment
-    number of major vessels (0-3) colored by flourosopy
-    thal: 0 = normal; 1 = fixed defect; 2 = reversable defect
-    """
-    st.write(text)
-    # Load the data dataset
-    df = pd.read_csv('heart.csv', header=0)
+    # Convert data features to a DataFrame
+    feature_names = data.feature_names
+    df = pd.DataFrame(data.data, columns=feature_names)
+    df['target'] = data.target
+    
+    # Separate features and target variable
+    X = df.drop('target', axis=1)  # Target variable column name
+    y = df['target']
+
+    st.subheader('Descriptive Statistics')
+    st.write(df.describe(include='all').T)
 
     with st.expander('Click to browse the dataset'):
         st.write(df)
@@ -127,12 +117,16 @@ def app():
         for col, values in unique_values.items():
             st.write(f"- {col}: {', '.join(map(str, values))}")
 
-    st.subheader('Descriptive Statistics')
-    st.write(df.describe(include='all').T)
+    # Split data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Separate features and target variable
-    X = df.drop('target', axis=1)  # Target variable column name
-    y = df['target']
+    #save the values to the session state
+    
+    st.session_state['X_train'] = X_train
+    st.session_state['X_test'] = X_test
+    st.session_state['y_train'] = y_train
+    st.session_state['y_test'] = y_test
+
 
     # Preprocess the data (e.g., scaling)
     scaler = StandardScaler()
@@ -148,42 +142,7 @@ def app():
     st.session_state.y_test = y_test
 
     st.session_state.dataset_ready = True
-
-    with st.expander('Click to show the graphs'):
-        bins = [10, 30, 50, 70, 90]
-        labels = ['10-29', '30-49', '50-69', '70-89']
-        df['age_group'] = pd.cut(df['age'], bins, labels=labels)
-        countplot(df, "age_group", "sex", "Age and Sex")
-        countplot(df, "sex", "target", "Sex and Heart Disease")
-        countplot(df, "age_group", "target", "Age Group and Heart Disease")
-        countplot(df, "target", "fbs", "FBS>120 and Heart Disease")
-        countplot(df, "target", "thal", "THAL and Heart Disease")
-        plot_feature(df["trestbps"], df["chol"], 'trestbps', 'chol', 'trestbps VS chol')
-        plot_feature(df["thalach"], df["chol"], 'thalach', 'chol', 'thalach VS chol')
-
-def countplot(df, feature, grouping, title):
-    fig, ax = plt.subplots(figsize=(6, 3))
-    # Create the countplot with clear title and legend
-    p = sns.countplot(x=feature, data = df, hue=grouping,  palette='bright')
-    ax.set_title(title, fontsize=14)
-
-    # Display the plot
-    plt.tight_layout()  # Prevent overlapping elements
-    st.pyplot(fig)
-
-
-def plot_feature(feature, target, labelx, labely, title):
-    # Display the plots
-    fig, ax = plt.subplots(figsize=(10, 6))
-    # Scatter plot
-    ax.scatter(feature, target)
-    # Add labels and title
-    ax.set_xlabel(labelx)
-    ax.set_ylabel(labely)
-    ax.set_title(title)
-    # Add grid
-    ax.grid(True)
-    st.pyplot(fig)
+    st,write('Dataset loadking complete.')
 
 #run the app
 if __name__ == "__main__":
