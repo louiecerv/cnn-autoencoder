@@ -142,7 +142,7 @@ def app():
     st.session_state.y_test = y_test
 
     st.session_state.dataset_ready = True
-    st,write('Dataset loadking complete.')
+    st.write('Dataset loadking complete.')
 
 #run the app
 if __name__ == "__main__":
