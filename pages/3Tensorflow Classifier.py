@@ -13,38 +13,35 @@ import time
 # Define the Streamlit app
 def app():
 
-    st.subheader('Binary Classification Task for Heart Disease Prediction')
-    text = """The objective is to build a model that can classify whether a patient has 
-    heart disease or not based on various features. It's a binary classification task 
-    because the model predicts one of two possible outcomes:
-    \nPresence of heart disease (positive class)
-    \nAbsence of heart disease (negative class)
-    
-    \nTensorFlow and Keras for Building the ANN
-    TensorFlow provides a powerful platform for numerical computations, and Keras acts 
-    as a high-level API on top of TensorFlow, simplifying the ANN development process. 
-    \nData Preprocessing:
-    \nLoad the heart disease dataset (commonly used ones include Cleveland Clinic 
-    Foundation data from UCI Machine Learning Repository).
-    Preprocess the data by handling missing values, converting categorical variables 
-    (if any) to numerical representations using techniques like one-hot encoding, 
-    and normalizing the features to a common scale.
-    \nModel Building: Define the ANN architecture using Keras. This typically 
-    involves: An input layer with a size matching the number of features in the data. 
-    One or more hidden layers with a specific number of neurons (activation functions 
-    are applied within these layers to introduce non-linearity).
-    An output layer with a single neuron using a sigmoid activation function (squashes 
-    the output between 0 and 1, suitable for binary classification).
-    \nModel Compilation:
-    Specify the loss function (e.g., binary cross-entropy for binary classification) 
-    to measure the model's performance during training.
-    Choose an optimizer (e.g., Adam) that updates the model's weights to minimize the 
-    loss.
-    \nModel Training: Split the data into training and testing sets. Train the model on 
-    the training set, iteratively adjusting the weights to minimize the loss and improve 
-    its ability to distinguish between patients with and without heart disease.
-    \nModel Evaluation: Evaluate the model's performance on the unseen testing set using 
-    metrics loss and accuracy. """
+    st.subheader('Binary Classification of Breast Cancer with Tensorflow ANN')
+    text = """This task involves building an Artificial Neural Network (ANN) using Tensorflow to 
+    classify tumors in the Wisconsin Breast Cancer Dataset as malignant or benign. 
+    \n1. Data Preparation: Load the dataset: Use pandas to read the CSV file containing the features 
+    (e.g., radius, texture) and the target variable (diagnosis: malignant or benign).
+    \nPreprocess the data: Handle missing values (if any) by imputation or removal. 
+    Encode categorical features (diagnosis) as numerical labels (e.g., malignant = 1, benign = 0). 
+    Scale the features: Normalize or standardize the feature values to a common range 
+    for better training.
+    \n2. Building the ANN: Define the model architecture in Tensorflow: 
+    \nCreate a sequential model.
+    Add hidden layers with a specific number of neurons and activation 
+    functions (e.g., ReLU).
+    Choose an appropriate output layer with one neuron and a sigmoid activation 
+    for binary classification (output between 0 and 1).
+    \nCompile the model:
+    Specify the loss function (e.g., binary cross-entropy for binary classification).
+    Define the optimizer (e.g., Adam) to update the model weights during training.
+    Set metrics to track performance during training (e.g., accuracy).
+    \n3. Training the ANN:
+    Split the data into training and testing sets: Use techniques like train-test 
+    split to create separate datasets for training and evaluating the model.
+    Train the model: Fit the model on the training data for a specific number of epochs.
+    Monitor the training process: Track metrics like accuracy and loss on both 
+    training and validation sets to identify overfitting or underfitting.
+    \n4. Evaluation:
+    Evaluate the model on the testing set: Use the trained model to predict labels for 
+    the unseen testing data. Analyze the performance: Calculate metrics like loss and 
+    accuracy to assess the model's ability to classify the data correctly."""
     st.write(text)
 
     X_train = st.session_state.X_train
