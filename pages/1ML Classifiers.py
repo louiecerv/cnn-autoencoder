@@ -16,41 +16,31 @@ def app():
     if "dataset_ready" not in st.session_state:
         st.error("Dataset must be loaded. Click Heart Disease in the sidebar.")
         
-    st.subheader("Heart Disease Classification as a Binary Task")
-    text = """In a heart disease classification task, the objective is to build 
-    a model that can predict whether a patient is likely to have heart 
-    disease based on a set of features. This is a classic example of a 
-    binary classification problem. The model is trained on a dataset where 
-    each data point represents a patient, and includes features like age, 
-    blood pressure, cholesterol levels, etc. Each data point also has a 
-    corresponding label indicating the presence (positive) or absence 
-    (negative) of heart disease.  
-    \nThe goal of the model is to learn the relationship between these features 
-    and the disease, and then use that knowledge to classify new, 
-    unseen patients as belonging to either the "heart disease" or 
-    "no heart disease" category.
-    \nClassifiers chosen:
-    K-Nearest Neighbors (KNN): This algorithm classifies a data point by 
-    identifying the k nearest data points in the training set based on 
-    feature similarity. The majority class among these k neighbors is 
-    then assigned as the predicted class for the new data point. KNN is a 
-    simple and interpretable method, but can be computationally expensive 
-    for large datasets. 
-    \nSupport Vector Machine (SVM):  This algorithm creates a hyperplane in the 
-    feature space that best separates the data points belonging to different classes. 
-    New data points are then classified based on which side of the hyperplane 
-    they fall on. SVMs are known for good performance on various classification 
-    tasks, but can be sensitive to parameter tuning.
-    \nNaive Bayes:** This probabilistic classifier uses Bayes' theorem to calculate 
-    the probability of a data point belonging to a particular class based on its 
-    features. It assumes independence between features, which might not always 
-    hold true in real-world data. However, Naive Bayes is a fast and efficient 
-    classifier that can be effective for certain problems.
-    \nThese three algorithms represent a good selection of common machine 
-    learning approaches for binary classification tasks like heart disease 
-    prediction. Each has its own strengths and weaknesses, and the best choice for a
-    specific problem can depend on the characteristics of the data and the desired 
-    model properties. """
+    st.subheader("Binary Classification of Breast Cancer using KNN, SVM, and Naive Bayes")
+    text = """This is a binary classification task aimed at predicting whether a tumor is malignant 
+    (cancerous) or benign (non-cancerous) based on a set of features extracted from breast 
+    tissue samples. 
+    \n**Dataset:** A popular dataset for this task is the Wisconsin Diagnostic Breast Cancer 
+    (WDBC) dataset available from the UCI Machine Learning Repository This dataset contains 
+    information on several features like clump thickness, cell size uniformity, and
+      marginal adhesion, along with a class label (malignant or benign) for each sample.
+    \n**Algorithms:**
+    \n* **K-Nearest Neighbors (KNN):** 
+    * Classifies a new data point by considering the labels of its k nearest neighbors in the training data. 
+    * In the breast cancer context, if the majority of the k nearest neighbors (based on feature similarity) are malignant in the training data, the new data point is classified as malignant and vice versa. 
+    * Tuning the parameter k is crucial for optimal performance.
+    \n* **Support Vector Machine (SVM):** 
+    *  Finds a hyperplane in the feature space that best separates the data points belonging to different classes (malignant and benign) with the maximum margin. 
+    *  This hyperplane can then be used to classify new data points. 
+    *  SVMs are powerful for high-dimensional data and can handle non-linear relationships between features, but selecting the right kernel function can be important.
+    \n* **Naive Bayes:**
+    * A probabilistic classifier based on Bayes' theorem. 
+    * It assumes independence between features, which may not always hold true for real-world data like breast cancer. 
+    *  However, Naive Bayes is efficient to train and can be a good baseline for comparison. 
+    *  It calculates the probability of a data point belonging to each class (malignant or benign) based on the individual feature probabilities. The class with the highest probability is assigned.
+    \nThe performance of these algorithms can be evaluated using metrics like accuracy, precision, recall, 
+    and F1-score. These metrics  consider the number of correctly classified and incorrectly classified 
+    malignant and benign tumors. """
     st.write(text)
 
     #add the classifier selection to the sidebar
