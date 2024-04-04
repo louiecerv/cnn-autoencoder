@@ -43,7 +43,7 @@ def app():
 
     st.image('breast-cancer.jpg', caption="Breast Cancer Dataset")
 
-    text = """he breast cancer dataset in scikit-learn is a well-known dataset used for binary 
+    text = """The breast cancer dataset in scikit-learn is a well-known dataset used for binary 
         classification tasks. It contains data collected from patients diagnosed with breast cancer. 
         Here's a breakdown of the dataset:
         \nSource: The data consists of features extracted from digitized images of fine needle 
