@@ -53,62 +53,64 @@ def app():
 ."""
 
     st.write(text)
+    if st.button("Load Images"):
+        # defining the size of the image
+        SIZE = 160
+        color_img = []
+        path = 'landscape Images/color'
+        files = os.listdir(path)
+        files = sorted_alphanumeric(files)
+        for i in tqdm(files):    
+            if i == '6000.jpg':
+                break
+            else:    
+                img = cv2.imread(path + '/'+i,1)
+                # open cv reads images in BGR format so we have to convert it to RGB
+                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                #resizing image
+                img = cv2.resize(img, (SIZE, SIZE))
+                img = img.astype('float32') / 255.0
+                color_img.append(img_to_array(img))
 
-    # defining the size of the image
-    SIZE = 160
-    color_img = []
-    path = 'landscape Images/color'
-    files = os.listdir(path)
-    files = sorted_alphanumeric(files)
-    for i in tqdm(files):    
-        if i == '6000.jpg':
-            break
-        else:    
-            img = cv2.imread(path + '/'+i,1)
-            # open cv reads images in BGR format so we have to convert it to RGB
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        gray_img = []
+        path = "landscape Images/gray"
+        files = os.listdir(path)
+        files = sorted_alphanumeric(files)
+        for i in tqdm(files):
+            if i == '6000.jpg':
+                break
+            else: 
+                img = cv2.imread(path + '/'+i,1)
+
             #resizing image
             img = cv2.resize(img, (SIZE, SIZE))
             img = img.astype('float32') / 255.0
-            color_img.append(img_to_array(img))
+            gray_img.append(img_to_array(img))
+        
+        for i in range(3,10):
+            plot_images(color_img[i],gray_img[i])
 
-    gray_img = []
-    path = "landscape Images/gray"
-    files = os.listdir(path)
-    files = sorted_alphanumeric(files)
-    for i in tqdm(files):
-        if i == '6000.jpg':
-            break
-        else: 
-            img = cv2.imread(path + '/'+i,1)
+        train_gray_image = gray_img[:5500]
+        train_color_image = color_img[:5500]
 
-        #resizing image
-        img = cv2.resize(img, (SIZE, SIZE))
-        img = img.astype('float32') / 255.0
-        gray_img.append(img_to_array(img))
-    
-    for i in range(3,10):
-        plot_images(color_img[i],gray_img[i])
+        test_gray_image = gray_img[5500:]
+        test_color_image = color_img[5500:]
 
-    train_gray_image = gray_img[:5500]
-    train_color_image = color_img[:5500]
+        # reshaping
+        train_g = np.reshape(train_gray_image,(len(train_gray_image),SIZE,SIZE,3))
+        train_c = np.reshape(train_color_image, (len(train_color_image),SIZE,SIZE,3))
+        st.write('Train color image shape:',train_c.shape)
 
-    test_gray_image = gray_img[5500:]
-    test_color_image = color_img[5500:]
+        test_gray_image = np.reshape(test_gray_image,(len(test_gray_image),SIZE,SIZE,3))
+        test_color_image = np.reshape(test_color_image, (len(test_color_image),SIZE,SIZE,3))
+        print('Test color image shape',test_color_image.shape)
 
-    # reshaping
-    train_g = np.reshape(train_gray_image,(len(train_gray_image),SIZE,SIZE,3))
-    train_c = np.reshape(train_color_image, (len(train_color_image),SIZE,SIZE,3))
-    st.write('Train color image shape:',train_c.shape)
+    if st.button("Initialize Model"):
 
-    test_gray_image = np.reshape(test_gray_image,(len(test_gray_image),SIZE,SIZE,3))
-    test_color_image = np.reshape(test_color_image, (len(test_color_image),SIZE,SIZE,3))
-    print('Test color image shape',test_color_image.shape)
+        model = get_model()
+        model.summary()
 
-    model = get_model()
-    model.summary()
-
-    if st.button("Start"):
+    if st.button("Start Training"):
          
         model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
               metrics = ['acc'])
@@ -121,7 +123,6 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-    
 def down(filters , kernel_size, apply_batch_normalization = True):
     downsample = tf.keras.models.Sequential()
     downsample.add(layers.Conv2D(filters,kernel_size,padding = 'same', strides = 2))
