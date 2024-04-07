@@ -113,6 +113,10 @@ def app():
         # reshaping
         train_g = np.reshape(train_gray_image,(len(train_gray_image),SIZE,SIZE,3))
         train_c = np.reshape(train_color_image, (len(train_color_image),SIZE,SIZE,3))
+        # save variables to session
+        st.session_state.train_g = train_g
+        st.session_state.train_c = train_c
+
         st.write('Train color image shape:',train_c.shape)
 
         test_gray_image = np.reshape(test_gray_image,(len(test_gray_image),SIZE,SIZE,3))
@@ -143,6 +147,9 @@ def app():
         st.text(summary_str)
 
     if st.button("Start Training"):
+        train_g = st.session_state.train_g
+        train_c = st.session_state.train_c
+        
         model = st.session_state
 
         model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
