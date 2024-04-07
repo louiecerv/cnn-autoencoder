@@ -13,7 +13,8 @@ import re
 import matplotlib.pyplot as plt
 import time
 from keras import layers
-
+import contextlib
+import io  # Import the io module
 
 
 # Suppress the oneDNN warning
@@ -46,7 +47,7 @@ def plot_images(color, grayscale):
 def app():
     if "model" not in st.session_state:
     st.session_state.model = []
-    
+
     st.subheader("How to use this Data App")
 
     text = """This data app helps you train and test a model on your images. To ensure everything 
@@ -134,6 +135,13 @@ def app():
         model = get_model()
         model.summary()
         st.session_state = model
+
+        # Capture the summary output
+        with contextlib.redirect_stdout(io.StringIO()) as new_stdout:
+            model.summary()
+            summary_str = new_stdout.getvalue()
+        # Display the summary using st.text()
+        st.text(summary_str)
 
     if st.button("Start Training"):
         model = st.session_state
