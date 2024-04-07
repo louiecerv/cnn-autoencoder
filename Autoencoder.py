@@ -52,7 +52,7 @@ def app():
     West Visayas State University"""
     st.text(text)
 
-    st.image('breast-cancer.jpg', caption="Breast Cancer Dataset")
+    #st.image('breast-cancer.jpg', caption="Breast Cancer Dataset")
 
     text = """The breast cancer dataset in scikit-learn is a well-known dataset used for binary 
         classification tasks. It contains data collected from patients diagnosed with breast cancer. 
@@ -103,7 +103,7 @@ def app():
     # defining the size of the image
     SIZE = 160
     color_img = []
-    path = '../input/landscape-image-colorization/landscape Images/color'
+    path = 'landscape Images/color'
     files = os.listdir(path)
     files = sorted_alphanumeric(files)
     for i in tqdm(files):    
