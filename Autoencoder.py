@@ -133,6 +133,10 @@ def app():
         
         model.fit(train_g, train_c, epochs = 50,batch_size = 50,verbose = 0)
 
+        model.evaluate(test_gray_image,test_color_image)
+
+    
+
 def down(filters , kernel_size, apply_batch_normalization = True):
     downsample = tf.keras.models.Sequential()
     downsample.add(layers.Conv2D(filters,kernel_size,padding = 'same', strides = 2))
