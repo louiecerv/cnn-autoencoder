@@ -16,6 +16,10 @@ from keras import layers
 import contextlib
 import io  # Import the io module
 
+st.session_state.model = []
+st.session_state.train_g = []
+st.session_state.train_c = []
+
 
 # Suppress the oneDNN warning
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
@@ -45,9 +49,6 @@ def plot_images(color, grayscale):
 
 # Define the Streamlit app
 def app():
-    st.session_state.model = []
-    st.session_state.train_g = []
-    st.session_state.train_c = []
 
     st.subheader("How to use this Data App")
 
