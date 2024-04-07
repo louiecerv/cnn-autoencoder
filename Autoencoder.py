@@ -123,7 +123,7 @@ def app():
     test_color_image = np.reshape(test_color_image, (len(test_color_image),SIZE,SIZE,3))
     print('Test color image shape',test_color_image.shape)
 
-    model = model()
+    model = get_model()
     model.summary()
 
     if st.button("Start"):
@@ -149,7 +149,7 @@ def up(filters, kernel_size, dropout = False):
     upsample.add(keras.layers.LeakyReLU())
     return upsample
 
-def model():
+def get_model():
     inputs = layers.Input(shape= [160,160,3])
     d1 = down(128,(3,3),False)(inputs)
     d2 = down(128,(3,3),False)(d1)
