@@ -129,7 +129,7 @@ def app():
         # Progress bar reaches 100% after the loop completes
         st.success("Image dataset loading completed!") 
 
-        model = get_model()
+        model = Autoencoder()
         model.summary()
 
         # Capture the summary output
@@ -150,43 +150,60 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-def down(filters , kernel_size, apply_batch_normalization = True):
-    downsample = tf.keras.models.Sequential()
-    downsample.add(layers.Conv2D(filters,kernel_size,padding = 'same', strides = 2))
-    if apply_batch_normalization:
-        downsample.add(layers.BatchNormalization())
-    downsample.add(keras.layers.LeakyReLU())
-    return downsample
 
-def up(filters, kernel_size, dropout = False):
-    upsample = tf.keras.models.Sequential()
-    upsample.add(layers.Conv2DTranspose(filters, kernel_size,padding = 'same', strides = 2))
-    if dropout:
-        upsample.dropout(0.2)
-    upsample.add(keras.layers.LeakyReLU())
-    return upsample
+class Autoencoder(tf.keras.Model):
 
-def get_model():
-    inputs = layers.Input(shape= [160,160,3])
-    d1 = down(128,(3,3),False)(inputs)
-    d2 = down(128,(3,3),False)(d1)
-    d3 = down(256,(3,3),True)(d2)
-    d4 = down(512,(3,3),True)(d3)
-    
-    d5 = down(512,(3,3),True)(d4)
-    #upsampling
-    u1 = up(512,(3,3),False)(d5)
-    u1 = layers.concatenate([u1,d4])
-    u2 = up(256,(3,3),False)(u1)
-    u2 = layers.concatenate([u2,d3])
-    u3 = up(128,(3,3),False)(u2)
-    u3 = layers.concatenate([u3,d2])
-    u4 = up(128,(3,3),False)(u3)
-    u4 = layers.concatenate([u4,d1])
-    u5 = up(3,(3,3),False)(u4)
-    u5 = layers.concatenate([u5,inputs])
-    output = layers.Conv2D(3,(2,2),strides = 1, padding = 'same')(u5)
-    return tf.keras.Model(inputs=inputs, outputs=output)
+    def __init__(self):
+        super(Autoencoder, self).__init__()
+
+        # Encoder layers
+        self.down1 = self.down(128, (3, 3), False)
+        self.down2 = self.down(128, (3, 3), False)
+        self.down3 = self.down(256, (3, 3), True)
+        self.down4 = self.down(512, (3, 3), True)
+        self.down5 = self.down(512, (3, 3), True)
+
+        # Decoder layers
+        self.up1 = self.up(512, (3, 3), False)
+        self.up2 = self.up(256, (3, 3), False)
+        self.up3 = self.up(128, (3, 3), False)
+        self.up4 = self.up(128, (3, 3), False)
+        self.up5 = self.up(3, (3, 3), False)
+
+        self.final_conv = layers.Conv2D(3, (2, 2), strides=1, padding='same')
+
+    def down(self, filters, kernel_size, apply_batch_normalization=True):
+        return tf.keras.Sequential([
+            layers.Conv2D(filters, kernel_size, padding='same', strides=2),
+            layers.BatchNormalization() if apply_batch_normalization else tf.identity,
+            layers.LeakyReLU()
+        ])
+
+    def up(self, filters, kernel_size, dropout=False):
+        return tf.keras.Sequential([
+            layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2),
+            layers.Dropout(0.2) if dropout else tf.identity,
+            layers.LeakyReLU()
+        ])
+
+    def call(self, inputs):
+        x = self.down1(inputs)
+        x = self.down2(x)
+        x = self.down3(x)
+        x = self.down4(x)
+        x = self.down5(x)
+
+        x = self.up1(x)
+        x = layers.concatenate([x, self.down4(inputs)])  # Skip connection
+        x = self.up2(x)
+        x = layers.concatenate([x, self.down3(inputs)])  # Skip connection
+        x = self.up3(x)
+        x = layers.concatenate([x, self.down2(inputs)])  # Skip connection
+        x = self.up4(x)
+        x = layers.concatenate([x, self.down1(inputs)])  # Skip connection
+        x = self.up5(x)
+        x = layers.concatenate([x, inputs])  # Final skip connection
+        return self.final_conv(x)
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
