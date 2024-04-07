@@ -14,6 +14,9 @@ import matplotlib.pyplot as plt
 import time
 from keras import layers
 
+if "model" not in st.session_state:
+    st.session_state.model = []
+
 # Suppress the oneDNN warning
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
@@ -112,7 +115,7 @@ def app():
 
         test_gray_image = np.reshape(test_gray_image,(len(test_gray_image),SIZE,SIZE,3))
         test_color_image = np.reshape(test_color_image, (len(test_color_image),SIZE,SIZE,3))
-        print('Test color image shape',test_color_image.shape)
+        st.write('Test color image shape',test_color_image.shape)
     
         # update the progress bar
         for i in range(100):
@@ -128,9 +131,11 @@ def app():
 
         model = get_model()
         model.summary()
+        st.session_state = model
 
     if st.button("Start Training"):
-         
+        model = st.session_state
+        
         model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
               metrics = ['acc'])
         
