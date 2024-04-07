@@ -46,6 +46,8 @@ def plot_images(color, grayscale):
 # Define the Streamlit app
 def app():
     st.session_state.model = []
+    st.session_state.train_g = []
+    st.session_state.train_c = []
 
     st.subheader("How to use this Data App")
 
@@ -149,7 +151,7 @@ def app():
     if st.button("Start Training"):
         train_g = st.session_state.train_g
         train_c = st.session_state.train_c
-        
+
         model = st.session_state
 
         model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
