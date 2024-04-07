@@ -13,7 +13,7 @@ from tqdm import tqdm
 import re
 import matplotlib.pyplot as plt
 import time
-
+from keras import layers
 
 # to get the files in proper order
 def sorted_alphanumeric(data):  
@@ -146,7 +146,71 @@ def app():
     for i in range(3,10):
         plot_images(color_img[i],gray_img[i])
 
+    train_gray_image = gray_img[:5500]
+    train_color_image = color_img[:5500]
 
+    test_gray_image = gray_img[5500:]
+    test_color_image = color_img[5500:]
+
+    # reshaping
+    train_g = np.reshape(train_gray_image,(len(train_gray_image),SIZE,SIZE,3))
+    train_c = np.reshape(train_color_image, (len(train_color_image),SIZE,SIZE,3))
+    st.write('Train color image shape:',train_c.shape)
+
+
+    test_gray_image = np.reshape(test_gray_image,(len(test_gray_image),SIZE,SIZE,3))
+    test_color_image = np.reshape(test_color_image, (len(test_color_image),SIZE,SIZE,3))
+    print('Test color image shape',test_color_image.shape)
+
+    model = model()
+    model.summary()
+
+    if st.button("Start"):
+         
+        model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
+              metrics = ['acc'])
+        
+        model.fit(train_g, train_c, epochs = 50,batch_size = 50,verbose = 0)
+
+def down(filters , kernel_size, apply_batch_normalization = True):
+    downsample = tf.keras.models.Sequential()
+    downsample.add(layers.Conv2D(filters,kernel_size,padding = 'same', strides = 2))
+    if apply_batch_normalization:
+        downsample.add(layers.BatchNormalization())
+    downsample.add(keras.layers.LeakyReLU())
+    return downsample
+
+
+def up(filters, kernel_size, dropout = False):
+    upsample = tf.keras.models.Sequential()
+    upsample.add(layers.Conv2DTranspose(filters, kernel_size,padding = 'same', strides = 2))
+    if dropout:
+        upsample.dropout(0.2)
+    upsample.add(keras.layers.LeakyReLU())
+    return upsample
+
+
+def model():
+    inputs = layers.Input(shape= [160,160,3])
+    d1 = down(128,(3,3),False)(inputs)
+    d2 = down(128,(3,3),False)(d1)
+    d3 = down(256,(3,3),True)(d2)
+    d4 = down(512,(3,3),True)(d3)
+    
+    d5 = down(512,(3,3),True)(d4)
+    #upsampling
+    u1 = up(512,(3,3),False)(d5)
+    u1 = layers.concatenate([u1,d4])
+    u2 = up(256,(3,3),False)(u1)
+    u2 = layers.concatenate([u2,d3])
+    u3 = up(128,(3,3),False)(u2)
+    u3 = layers.concatenate([u3,d2])
+    u4 = up(128,(3,3),False)(u3)
+    u4 = layers.concatenate([u4,d1])
+    u5 = up(3,(3,3),False)(u4)
+    u5 = layers.concatenate([u5,inputs])
+    output = layers.Conv2D(3,(2,2),strides = 1, padding = 'same')(u5)
+    return tf.keras.Model(inputs=inputs, outputs=output)
 
 #run the app
 if __name__ == "__main__":
