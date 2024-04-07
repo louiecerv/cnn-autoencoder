@@ -137,7 +137,7 @@ def app():
 
         for i in range(50,58):
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
-            plot_images(test_color_image[i], test_gray_image[i], predicted)
+            plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
     
 def down(filters , kernel_size, apply_batch_normalization = True):
@@ -179,7 +179,7 @@ def get_model():
     return tf.keras.Model(inputs=inputs, outputs=output)
 
 # defining function to plot images pair
-def plot_images(color, grayscale, predicted):
+def plot_3images(color, grayscale, predicted):
     fig, axes = plt.subplots(1, 3, figsize=(15, 15))  # Create a figure with 3 subplots
 
     # Set titles for each subplot
