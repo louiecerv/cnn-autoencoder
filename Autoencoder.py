@@ -44,9 +44,9 @@ def app():
     characteristics of an image and subsequently reconstruct it based on these acquired 
     features. This enables them to effectively colorize grayscale images, streamlining the 
     process and reducing human involvement."""
-    st.image('colorization.jpg', caption="Image Colorization Task")
-    st.write(text)
 
+    st.write(text)
+    st.image('colorization.jpg', caption="Image Colorization Task")
 #run the app
 if __name__ == "__main__":
     app()
