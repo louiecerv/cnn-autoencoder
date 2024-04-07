@@ -33,10 +33,10 @@ def plot_images(color, grayscale):
 
 # Define the Streamlit app
 def app():
+    st.subheader("How to use this Data App")
 
-    text = """##How to Use this Data App
-    This data app helps you train and test a model on your images. To ensure everything runs smoothly, 
-    follow these steps in the correct order:
+    text = """This data app helps you train and test a model on your images. To ensure everything 
+    runs smoothly, follow these steps in the correct order:
     \n1. **Load Your Images:**  Start by uploading your image data. The app will accept various image 
     formats, allowing you to easily import your dataset.
     \n2. **Initialize the Model:** Once your images are loaded, the app will guide you through selecting 
