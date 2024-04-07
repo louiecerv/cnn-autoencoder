@@ -141,21 +141,16 @@ def app():
             # Display the summary using st.text()
             st.text(summary_str)
 
-            if st.button("Start Training"):
-                train_g = st.session_state.train_g
-                train_c = st.session_state.train_c
-                print(train_g.shape, train_c.shape)
+            model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
+                metrics = ['acc'])
+            
+            model.fit(train_g, train_c, epochs = 50, batch_size = 50,verbose = 0)
 
-                model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
-                    metrics = ['acc'])
-                
-                model.fit(train_g, train_c, epochs = 50, batch_size = 50,verbose = 0)
+            model.evaluate(test_gray_image, test_color_image)
 
-                model.evaluate(test_gray_image, test_color_image)
-
-                for i in range(50,58):
-                    predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
-                    plot_3images(test_color_image[i], test_gray_image[i], predicted)
+            for i in range(50,58):
+                predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
+                plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
 def down(filters , kernel_size, apply_batch_normalization = True):
     downsample = tf.keras.models.Sequential()
