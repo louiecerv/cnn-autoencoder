@@ -21,6 +21,16 @@ def sorted_alphanumeric(data):
     alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)',key)]
     return sorted(data,key = alphanum_key)
 
+def plot_images(color, grayscale):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 15))  # Create figure and subplots
+
+    ax1.imshow(color)  # Display color image on first subplot
+    ax1.set_title('Color Image', color='green', fontsize=20)  # Set title
+
+    ax2.imshow(grayscale)  # Display grayscale image on second subplot
+    ax2.set_title('Grayscale Image', color='black', fontsize=20)  # Set title
+
+    st.pyplot(fig)
 
 # Define the Streamlit app
 def app():
@@ -132,6 +142,9 @@ def app():
         img = cv2.resize(img, (SIZE, SIZE))
         img = img.astype('float32') / 255.0
         gray_img.append(img_to_array(img))
+    
+    for i in range(3,10):
+        plot_images(color_img[i],gray_img[i])
 
 
 
