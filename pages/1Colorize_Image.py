@@ -68,7 +68,7 @@ def app():
     model to see how well it performs."""
     st.write(text)
 
-    if st.button("Load Images"):
+    if st.sidebar.button("Load Images"):
         progress_bar = st.progress(0, text="Loading the images, please wait...")
 
         # defining the size of the image
@@ -135,8 +135,7 @@ def app():
         # Progress bar reaches 100% after the loop completes
         st.success("Image dataset loading completed!") 
 
-
-        if st.button("Initialize Model"):
+        if st.sidebar.button("Initialize Model"):
 
             model = get_model()
             model.summary()
