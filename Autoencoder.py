@@ -1,15 +1,26 @@
 #Input the relevant libraries
-import numpy as np
-import pandas as pd
-import streamlit as st
-import altair as alt
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-from sklearn.datasets import load_breast_cancer
 
+import streamlit as st
+import numpy as np
+import tensorflow as tf
+import keras
+import cv2
+from keras.layers import MaxPool2D,Conv2D,UpSampling2D,Input,Dropout
+from keras.models import Sequential
+from keras.preprocessing.image import img_to_array
+import os
+from tqdm import tqdm
+import re
+import matplotlib.pyplot as plt
 import time
+
+
+# to get the files in proper order
+def sorted_alphanumeric(data):  
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)',key)]
+    return sorted(data,key = alphanum_key)
+
 
 # Define the Streamlit app
 def app():
@@ -89,60 +100,40 @@ def app():
 
     st.write(text)
 
-    # Load the iris dataset
-    data = load_breast_cancer()
+    # defining the size of the image
+    SIZE = 160
+    color_img = []
+    path = '../input/landscape-image-colorization/landscape Images/color'
+    files = os.listdir(path)
+    files = sorted_alphanumeric(files)
+    for i in tqdm(files):    
+        if i == '6000.jpg':
+            break
+        else:    
+            img = cv2.imread(path + '/'+i,1)
+            # open cv reads images in BGR format so we have to convert it to RGB
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            #resizing image
+            img = cv2.resize(img, (SIZE, SIZE))
+            img = img.astype('float32') / 255.0
+            color_img.append(img_to_array(img))
 
-    # Convert data features to a DataFrame
-    feature_names = data.feature_names
-    df = pd.DataFrame(data.data, columns=feature_names)
-    df['target'] = data.target
-    
-    # Separate features and target variable
-    X = df.drop('target', axis=1)  # Target variable column name
-    y = df['target']
+    gray_img = []
+    path = "landscape Images\gray"
+    files = os.listdir(path)
+    files = sorted_alphanumeric(files)
+    for i in tqdm(files):
+        if i == '6000.jpg':
+            break
+        else: 
+            img = cv2.imread(path + '/'+i,1)
 
-    st.subheader('Descriptive Statistics')
-    st.write(df.describe(include='all').T)
-
-    with st.expander('Click to browse the dataset'):
-        st.write(df)
-
-    with st.expander('Click to display unique values in each feature.'):
-        # Get column names and unique values
-        columns = df.columns
-        unique_values = {col: df[col].unique() for col in columns}    
-        
-        # Display unique values for each column
-        st.write("\n**Unique Values:**")
-        for col, values in unique_values.items():
-            st.write(f"- {col}: {', '.join(map(str, values))}")
-
-    # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    #save the values to the session state
-    
-    st.session_state['X_train'] = X_train
-    st.session_state['X_test'] = X_test
-    st.session_state['y_train'] = y_train
-    st.session_state['y_test'] = y_test
+        #resizing image
+        img = cv2.resize(img, (SIZE, SIZE))
+        img = img.astype('float32') / 255.0
+        gray_img.append(img_to_array(img))
 
 
-    # Preprocess the data (e.g., scaling)
-    scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X)
-
-    # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-
-    # store for later use
-    st.session_state.X_train = X_train
-    st.session_state.X_test = X_test
-    st.session_state.y_train = y_train
-    st.session_state.y_test = y_test
-
-    st.session_state.dataset_ready = True
-    st.write('Dataset loadking complete.')
 
 #run the app
 if __name__ == "__main__":
