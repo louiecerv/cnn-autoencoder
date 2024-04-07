@@ -16,10 +16,6 @@ from keras import layers
 import contextlib
 import io  # Import the io module
 
-st.session_state.model = []
-st.session_state.train_g = []
-st.session_state.train_c = []
-
 
 # Suppress the oneDNN warning
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
@@ -117,8 +113,6 @@ def app():
         train_g = np.reshape(train_gray_image,(len(train_gray_image),SIZE,SIZE,3))
         train_c = np.reshape(train_color_image, (len(train_color_image),SIZE,SIZE,3))
         # save variables to session
-        st.session_state.train_g = train_g
-        st.session_state.train_c = train_c
 
         st.write('Train color image shape:',train_c.shape)
 
@@ -139,7 +133,6 @@ def app():
 
             model = get_model()
             model.summary()
-            st.session_state = model
 
             # Capture the summary output
             with contextlib.redirect_stdout(io.StringIO()) as new_stdout:
@@ -152,7 +145,6 @@ def app():
                 train_g = st.session_state.train_g
                 train_c = st.session_state.train_c
                 print(train_g.shape, train_c.shape)
-                model = st.session_state
 
                 model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
                     metrics = ['acc'])
