@@ -14,8 +14,7 @@ import matplotlib.pyplot as plt
 import time
 from keras import layers
 
-if "model" not in st.session_state:
-    st.session_state.model = []
+
 
 # Suppress the oneDNN warning
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
@@ -45,6 +44,9 @@ def plot_images(color, grayscale):
 
 # Define the Streamlit app
 def app():
+    if "model" not in st.session_state:
+    st.session_state.model = []
+    
     st.subheader("How to use this Data App")
 
     text = """This data app helps you train and test a model on your images. To ensure everything 
@@ -135,7 +137,7 @@ def app():
 
     if st.button("Start Training"):
         model = st.session_state
-        
+
         model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
               metrics = ['acc'])
         
