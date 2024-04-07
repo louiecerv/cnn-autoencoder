@@ -131,16 +131,15 @@ def app():
         model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
               metrics = ['acc'])
         
-        model.fit(train_g, train_c, epochs = 50,batch_size = 50,verbose = 0)
+        model.fit(train_g, train_c, epochs = 50, batch_size = 50,verbose = 0)
 
-        model.evaluate(test_gray_image,test_color_image)
+        model.evaluate(test_gray_image, test_color_image)
 
         for i in range(50,58):
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
-            plot_images(test_color_image[i],test_gray_image[i],predicted)
+            plot_images(test_color_image[i], test_gray_image[i], predicted)
 
     
-
 def down(filters , kernel_size, apply_batch_normalization = True):
     downsample = tf.keras.models.Sequential()
     downsample.add(layers.Conv2D(filters,kernel_size,padding = 'same', strides = 2))
@@ -180,7 +179,7 @@ def get_model():
     return tf.keras.Model(inputs=inputs, outputs=output)
 
 # defining function to plot images pair
-def plot_images(color,grayscale,predicted):
+def plot_images(color, grayscale, predicted):
     fig, axes = plt.subplots(1, 3, figsize=(15, 15))  # Create a figure with 3 subplots
 
     # Set titles for each subplot
