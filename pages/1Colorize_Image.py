@@ -34,26 +34,25 @@ def plot_images(color, grayscale):
 # Define the Streamlit app
 def app():
 
-    text = """Grayscale to Color: CNN Authoencoder"""
-    st.header(text)
+    text = """##How to Use this Data App
+    This data app helps you train and test a model on your images. To ensure everything runs smoothly, 
+    follow these steps in the correct order:
+    \n1. **Load Your Images:**  Start by uploading your image data. The app will accept various image 
+    formats, allowing you to easily import your dataset.
+    \n2. **Initialize the Model:** Once your images are loaded, the app will guide you through selecting 
+    and customizing a model architecture. This is where you define the "brain" of your system that will 
+    learn from your data.
+    \n3. **Train and Test:**  With both images and model ready, you can initiate the training process. 
+    The app will split your data and train the model on one part while evaluating its performance on the other. 
+    This helps ensure your model generalizes well to unseen data.
+    These steps build upon each other. Uploading your data first allows the app to understand the type of 
+    information your model needs to learn from. Then, with the data loaded, you can define the model architecture 
+    to process that information effectively. Finally, after everything is set up, you can train and test your 
+    model to see how well it performs."""
 
-    text = """Prof. Louie F. Cervantes, M. Eng. (Information Engineering) \n
-    CCS 229 - Intelligent Systems
-    Department of Computer Science
-    College of Information and Communications Technology
-    West Visayas State University"""
-    st.text(text)
-
-    #st.image('breast-cancer.jpg', caption="Replace this image")
-
-    text = """Describe the image dataset"""
-    st.write(text)
-
-    text = """Replace with Autoencoder description
-."""
-
-    st.write(text)
     if st.button("Load Images"):
+        progress_bar = st.progress(0, text="Loading the images, please wait...")
+
         # defining the size of the image
         SIZE = 160
         color_img = []
@@ -104,6 +103,16 @@ def app():
         test_gray_image = np.reshape(test_gray_image,(len(test_gray_image),SIZE,SIZE,3))
         test_color_image = np.reshape(test_color_image, (len(test_color_image),SIZE,SIZE,3))
         print('Test color image shape',test_color_image.shape)
+    
+        # update the progress bar
+        for i in range(100):
+            # Update progress bar value
+            progress_bar.progress(i + 1)
+            # Simulate some time-consuming task (e.g., sleep)
+            time.sleep(0.01)
+        # Progress bar reaches 100% after the loop completes
+        st.success("Image dataset loading completed!") 
+
 
     if st.button("Initialize Model"):
 
