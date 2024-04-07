@@ -49,6 +49,7 @@ def app():
     information your model needs to learn from. Then, with the data loaded, you can define the model architecture 
     to process that information effectively. Finally, after everything is set up, you can train and test your 
     model to see how well it performs."""
+    st.write(text)
 
     if st.button("Load Images"):
         progress_bar = st.progress(0, text="Loading the images, please wait...")
