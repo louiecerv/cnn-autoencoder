@@ -14,6 +14,15 @@ import matplotlib.pyplot as plt
 import time
 from keras import layers
 
+# Suppress the oneDNN warning
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
+# Handle the deprecated tf.reset_default_graph warning (if using TensorFlow 2)
+if tf.version.VERSION.startswith('2'):
+    from tensorflow.compat.v1 import reset_default_graph  # Use compat.v1 for deprecated function
+else:
+    reset_default_graph = tf.compat.v1.reset_default_graph  # For TensorFlow 1 compatibility
+
 # to get the files in proper order
 def sorted_alphanumeric(data):  
     convert = lambda text: int(text) if text.isdigit() else text.lower()
