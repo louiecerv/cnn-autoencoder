@@ -151,7 +151,7 @@ def app():
     if st.button("Start Training"):
         train_g = st.session_state.train_g
         train_c = st.session_state.train_c
-
+        print(train_g.shape, train_c.shape)
         model = st.session_state
 
         model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
