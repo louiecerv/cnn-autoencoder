@@ -91,7 +91,7 @@ def app():
             color_img.append(img_to_array(img))
 
     gray_img = []
-    path = "landscape Images\gray"
+    path = "landscape Images/gray"
     files = os.listdir(path)
     files = sorted_alphanumeric(files)
     for i in tqdm(files):
@@ -135,6 +135,10 @@ def app():
 
         model.evaluate(test_gray_image,test_color_image)
 
+        for i in range(50,58):
+            predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
+            plot_images(test_color_image[i],test_gray_image[i],predicted)
+
     
 
 def down(filters , kernel_size, apply_batch_normalization = True):
@@ -174,6 +178,21 @@ def get_model():
     u5 = layers.concatenate([u5,inputs])
     output = layers.Conv2D(3,(2,2),strides = 1, padding = 'same')(u5)
     return tf.keras.Model(inputs=inputs, outputs=output)
+
+# defining function to plot images pair
+def plot_images(color,grayscale,predicted):
+    fig, axes = plt.subplots(1, 3, figsize=(15, 15))  # Create a figure with 3 subplots
+
+    # Set titles for each subplot
+    axes[0].set_title('Color Image', color='green', fontsize=20)
+    axes[1].set_title('Grayscale Image', color='black', fontsize=20)
+    axes[2].set_title('Predicted Image', color='red', fontsize=20)
+
+    # Display images on each subplot
+    axes[0].imshow(color)
+    axes[1].imshow(grayscale)
+    axes[2].imshow(predicted)
+    st.pyplot(fig)
 
 #run the app
 if __name__ == "__main__":
