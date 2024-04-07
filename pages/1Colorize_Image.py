@@ -46,7 +46,7 @@ def plot_images(color, grayscale):
 # Define the Streamlit app
 def app():
     if "model" not in st.session_state:
-    st.session_state.model = []
+        st.session_state.model = []
 
     st.subheader("How to use this Data App")
 
