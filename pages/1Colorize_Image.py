@@ -161,30 +161,35 @@ def app():
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
 
+Here's the modified code addressing the shape mismatch:
+
+Python
 def down(filters, kernel_size):
     downsample = tf.keras.layers.Conv2D(
         filters, kernel_size, padding="same", strides=2, activation="relu"
-    )  # Combine Conv2D and ReLU for efficiency
+    )
     return downsample
 
 def up(filters, kernel_size):
     upsample = tf.keras.layers.Conv2DTranspose(
         filters, kernel_size, padding="same", strides=2, activation="relu"
-    )  # Combine Conv2DTranspose and ReLU
+    )
     return upsample
 
 def get_model():
     inputs = layers.Input(shape=[160, 160, 3])
 
     # Encoder
-    d1 = down(64, (3, 3))(inputs)  # Reduce initial filters for efficiency
+    d1 = down(64, (3, 3))(inputs)
     d2 = down(128, (3, 3))(d1)
-    d3 = down(256, (3, 3))(d2)  # Skip d4 for shallower architecture
+    d3 = down(256, (3, 3))(d2)
 
     # Decoder
     u4 = up(128, (3, 3))(d3)
     u5 = up(64, (3, 3))(u4)
-    output = layers.Conv2D(3, (2, 2), strides=1, padding="same")(u5)  # Final output layer
+
+    # Crucial modification: Remove strides in the final output layer
+    output = layers.Conv2D(3, (2, 2), padding="same")(u5)
 
     return tf.keras.Model(inputs=inputs, outputs=output)
 
