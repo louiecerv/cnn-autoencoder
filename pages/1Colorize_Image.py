@@ -160,14 +160,6 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-def down(filters, kernel_size, apply_batch_normalization=True):
-    downsample = tf.keras.models.Sequential()
-    downsample.add(layers.Conv2D(filters, kernel_size, padding="same", strides=2))
-    if apply_batch_normalization:
-        downsample.add(layers.BatchNormalization())
-    downsample.add(keras.layers.LeakyReLU())
-    return downsample
-
 def downsample(filters, kernel_size, apply_batch_normalization=True):
     model = tf.keras.Sequential()
     model.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
