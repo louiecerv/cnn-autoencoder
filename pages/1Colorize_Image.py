@@ -100,7 +100,7 @@ def app():
         step=16
     )      
 
-    if st.sidebar.button("Load Images"):
+    if st.sidebar.button("Train and Test"):
         progress_bar = st.progress(0, text="Loading the images, please wait...")
 
         # defining the size of the image
