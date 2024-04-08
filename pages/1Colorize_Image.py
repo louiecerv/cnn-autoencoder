@@ -160,40 +160,31 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-def downsample(filters, kernel_size, apply_batch_normalization=True):
-    model = tf.keras.Sequential()
-    model.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
-    if apply_batch_normalization:
-        model.add(layers.BatchNormalization())
-    model.add(layers.LeakyReLU())
-    return model
+def down(filters, kernel_size):
+    downsample = tf.keras.models.Sequential()
+    downsample.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
+    downsample.add(keras.layers.LeakyReLU())
+    return downsample
 
-def upsample(filters, kernel_size):
-    model = tf.keras.Sequential()
-    model.add(layers.Conv2D(filters, kernel_size, padding='same'))
-    model.add(layers.UpSampling2D(2))
-    model.add(layers.BatchNormalization())
-    model.add(layers.LeakyReLU())
-    return model
+def up(filters, kernel_size):
+    upsample = tf.keras.models.Sequential()
+    upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
+    upsample.add(keras.layers.LeakyReLU())
+    return upsample
 
 def get_model():
     inputs = layers.Input(shape=[160, 160, 3])
-    d1 = downsample(64, (3, 3), False)(inputs)
-    d2 = downsample(128, (3, 3))(d1)
-    d3 = downsample(256, (3, 3))(d2)
-    d4 = downsample(512, (3, 3))(d3)
-    
-    u1 = upsample(256, (3, 3))(d4)
-    u1 = layers.concatenate([u1, d3])
-    u2 = upsample(128, (3, 3))(u1)
-    u2 = layers.concatenate([u2, d2])
-    u3 = upsample(64, (3, 3))(u2)
-    u3 = layers.concatenate([u3, d1])
-    
-    output = layers.Conv2D(3, (3, 3), activation='sigmoid', padding='same')(u3)
+    d1 = down(64, (3, 3))(inputs)
+    d2 = down(128, (3, 3))(d1)
+    # d3 = down(256, (3, 3))(d2)  # Removed layer
+
+    u1 = up(128, (3, 3))(d2)
+    u1 = layers.concatenate([u1, d1])
+    # u2 = up(64, (3, 3))(u1)
+    u2 = up(3, (3, 3))(u1)  # Combined upsampling with output layer
+    u2 = layers.concatenate([u2, inputs])
+    output = layers.Conv2D(3, (2, 2), strides=1, padding='same')(u2)
     return tf.keras.Model(inputs=inputs, outputs=output)
-
-
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
