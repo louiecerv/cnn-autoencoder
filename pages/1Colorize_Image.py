@@ -246,13 +246,16 @@ def app():
             # Simulate some time-consuming task (e.g., sleep)
             time.sleep(0.01)
         # Progress bar reaches 100% after the loop completes
-        st.success("Model training completed!")         
+        st.success("Model training completed!")     
+
+        st.write("Randomly selected recolored images.")    
 
         start_img  = random.randint(0, 400)
         end_img = start_img + 8
         for i in range(start_img, end_img):
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
+
 
 def down(filters, kernel_size):
     downsample = tf.keras.models.Sequential()
@@ -263,11 +266,9 @@ def down(filters, kernel_size):
 
 def up(filters, kernel_size):
     upsample = tf.keras.models.Sequential()
-    # Key change: Provide a placeholder input for clarity
-    upsample.add(layers.Add())  # Input will be specified later
     upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
     upsample.add(layers.LeakyReLU())
-    upsample.add(layers.BatchNormalization())
+    upsample.add(layers.BatchNormalization())  # Added batch normalization
     return upsample
 
 def get_model():
@@ -276,15 +277,17 @@ def get_model():
     # Encoder
     d1 = down(64, (3, 3))(inputs)
     d2 = down(128, (3, 3))(d1)
-    d3 = down(256, (3, 3))(d2)
+    d3 = down(256, (3, 3))(d2)  
 
     # Bottleneck
-    bottleneck = layers.Conv2D(n_neurons, (3, 3), padding='same', activation=c_actiovation)(d3)
+    bottleneck = layers.Conv2D(n_neurons, (3, 3), padding='same', activation = c_actiovation)(d3)  
 
     # Decoder
-    u1 = up(128, (3, 3))([bottleneck, d2])  # Provide two inputs to the Add layer
-    u2 = up(64, (3, 3))([u1, d1])  # Provide two inputs to the Add layer
-    u3 = up(3, (3, 3))(u2)  # No need for Add here, as u2 is already the result of concatenation
+    u1 = up(128, (3, 3))(bottleneck)
+    u1 = layers.concatenate([u1, d2])
+    u2 = up(64, (3, 3))(u1)  
+    u2 = layers.concatenate([u2, d1])
+    u3 = up(3, (3, 3))(u2)
 
     # Output
     outputs = layers.Conv2D(3, (3, 3), strides=1, padding='same', activation=o_activation)(u3)  # Using tanh
