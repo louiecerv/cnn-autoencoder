@@ -16,7 +16,6 @@ from keras import layers
 import contextlib
 import io  # Import the io module
 
-
 # Suppress the oneDNN warning
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
@@ -25,6 +24,8 @@ if tf.version.VERSION.startswith('2'):
     from tensorflow.compat.v1 import reset_default_graph  # Use compat.v1 for deprecated function
 else:
     reset_default_graph = tf.compat.v1.reset_default_graph  # For TensorFlow 1 compatibility
+
+inputs = []
 
 # to get the files in proper order
 def sorted_alphanumeric(data):  
@@ -129,7 +130,8 @@ def app():
         # Progress bar reaches 100% after the loop completes
         st.success("Image dataset loading completed!") 
 
-        model = Autoencoder((160, 160, 3)) 
+        inputs = (160, 160, 3)
+        model = get_model()
 
         # Capture the summary output
         st.write("Model summary details:")
@@ -150,50 +152,43 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-class Autoencoder(tf.keras.Model):
-    def __init__(self, input_shape):
-       super(Autoencoder, self).__init__()
-       self.input_shape = input_shape
+def down(filters , kernel_size, apply_batch_normalization = True):
+    downsample = tf.keras.models.Sequential()
+    downsample.add(layers.Conv2D(filters,kernel_size,padding = 'same', strides = 2))
+    if apply_batch_normalization:
+        downsample.add(layers.BatchNormalization())
+    downsample.add(keras.layers.LeakyReLU())
+    return downsample
 
-    def down(self, filters, kernel_size, apply_batch_normalization=True):
-       downsample = tf.keras.models.Sequential()
-       downsample.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
-       if apply_batch_normalization:
-           downsample.add(layers.BatchNormalization())
-       downsample.add(layers.LeakyReLU())
-       return downsample
+def up(filters, kernel_size, dropout = False):
+    upsample = tf.keras.models.Sequential()
+    upsample.add(layers.Conv2DTranspose(filters, kernel_size,padding = 'same', strides = 2))
+    if dropout:
+        upsample.dropout(0.2)
+    upsample.add(keras.layers.LeakyReLU())
+    return upsample
 
-    def up(self, filters, kernel_size, dropout=False):
-       upsample = tf.keras.models.Sequential()
-       upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
-       if dropout:
-           upsample.add(layers.Dropout(0.2))
-       upsample.add(layers.LeakyReLU())
-       return upsample
+def get_model():
 
-    def build(self, input_shape):
-        super(Autoencoder, self).build(input_shape)
-
-    def call(self, inputs):
-       d1 = self.down(128, (3, 3), False)(inputs)
-       d2 = self.down(128, (3, 3), False)(d1)
-       d3 = self.down(256, (3, 3), True)(d2)
-       d4 = self.down(512, (3, 3), True)(d3)
-       d5 = self.down(512, (3, 3), True)(d4)
-
-       # Upsampling
-       u1 = self.up(512, (3, 3), False)(d5)
-       u1 = layers.concatenate([u1, d4])
-       u2 = self.up(256, (3, 3), False)(u1)
-       u2 = layers.concatenate([u2, d3])
-       u3 = self.up(128, (3, 3), False)(u2)
-       u3 = layers.concatenate([u3, d2])
-       u4 = self.up(128, (3, 3), False)(u3)
-       u4 = layers.concatenate([u4, d1])
-       u5 = self.up(3, (3, 3), False)(u4)
-       u5 = layers.concatenate([u5, inputs])
-       output = layers.Conv2D(3, (2, 2), strides=1, padding='same')(u5)
-       return tf.keras.Model(inputs=inputs, outputs=output)
+    d1 = down(128,(3,3),False)(inputs)
+    d2 = down(128,(3,3),False)(d1)
+    d3 = down(256,(3,3),True)(d2)
+    d4 = down(512,(3,3),True)(d3)
+    
+    d5 = down(512,(3,3),True)(d4)
+    #upsampling
+    u1 = up(512,(3,3),False)(d5)
+    u1 = layers.concatenate([u1,d4])
+    u2 = up(256,(3,3),False)(u1)
+    u2 = layers.concatenate([u2,d3])
+    u3 = up(128,(3,3),False)(u2)
+    u3 = layers.concatenate([u3,d2])
+    u4 = up(128,(3,3),False)(u3)
+    u4 = layers.concatenate([u4,d1])
+    u5 = up(3,(3,3),False)(u4)
+    u5 = layers.concatenate([u5,inputs])
+    output = layers.Conv2D(3,(2,2),strides = 1, padding = 'same')(u5)
+    return tf.keras.Model(inputs=inputs, outputs=output)
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
