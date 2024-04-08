@@ -132,7 +132,8 @@ def app():
         model = Autoencoder(input_shape=(160, 160, 3)) 
 
         # Capture the summary output
-        with contextlib.redirect_stdout(io.StringIO()) as new_stdout:
+        st.write("Model summary details:")
+        with contextlib.redirect_stdout(io.StringIO()) as new_stdout:            
             model.summary()
             summary_str = new_stdout.getvalue()
         # Display the summary using st.text()
