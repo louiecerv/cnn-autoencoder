@@ -128,8 +128,8 @@ def app():
             time.sleep(0.01)
         # Progress bar reaches 100% after the loop completes
         st.success("Image dataset loading completed!") 
-        
-        model = Autoencoder(160, 160, 3) 
+
+        model = Autoencoder((160, 160, 3)) 
 
         # Capture the summary output
         st.write("Model summary details:")
