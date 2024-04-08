@@ -129,7 +129,6 @@ def app():
         # Progress bar reaches 100% after the loop completes
         st.success("Image dataset loading completed!") 
 
-        model = Autoencoder()
         model = Autoencoder(input_shape=(160, 160, 3)) 
         model.summary()
 
