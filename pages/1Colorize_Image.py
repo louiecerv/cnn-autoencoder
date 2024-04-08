@@ -173,7 +173,7 @@ def up(filters, kernel_size):
     return upsample
 
 def get_model():
-    inputs = layers.Input(shape=[160, 160, 3])
+    inputs = layers.Input(shape=[80, 80, 3])
     d1 = down(64, (3, 3))(inputs)
     d2 = down(128, (3, 3))(d1)
     # d3 = down(256, (3, 3))(d2)  # Removed layer
