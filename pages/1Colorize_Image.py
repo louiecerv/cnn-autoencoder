@@ -256,7 +256,6 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-
 def down(filters, kernel_size):
     downsample = tf.keras.models.Sequential()
     downsample.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
@@ -296,7 +295,6 @@ def get_model():
     outputs = layers.Conv2D(3, (3, 3), strides=1, padding='same', activation=o_activation)(u3)
 
     return tf.keras.Model(inputs=inputs, outputs=outputs)
-
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
