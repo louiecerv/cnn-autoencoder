@@ -150,12 +150,12 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-class Autoencoder:
-   def __init__(self, input_shape):
+class Autoencoder(tf.keras.Model):
+    def __init__(self, input_shape):
        super(Autoencoder, self).__init__()
        self.input_shape = input_shape
 
-   def down(self, filters, kernel_size, apply_batch_normalization=True):
+    def down(self, filters, kernel_size, apply_batch_normalization=True):
        downsample = tf.keras.models.Sequential()
        downsample.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
        if apply_batch_normalization:
@@ -163,7 +163,7 @@ class Autoencoder:
        downsample.add(layers.LeakyReLU())
        return downsample
 
-   def up(self, filters, kernel_size, dropout=False):
+    def up(self, filters, kernel_size, dropout=False):
        upsample = tf.keras.models.Sequential()
        upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
        if dropout:
@@ -171,7 +171,10 @@ class Autoencoder:
        upsample.add(layers.LeakyReLU())
        return upsample
 
-   def call(self, inputs):
+    def build(self, input_shape):
+        super(Autoencoder, self).build(input_shape)
+
+    def call(self, inputs):
        d1 = self.down(128, (3, 3), False)(inputs)
        d2 = self.down(128, (3, 3), False)(d1)
        d3 = self.down(256, (3, 3), True)(d2)
