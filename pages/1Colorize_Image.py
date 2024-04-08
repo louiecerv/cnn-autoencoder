@@ -186,7 +186,7 @@ def get_model():
     d4 = down(512, (3, 3), True)(d3)
 
     # Decoder
-    u1 = up(512, (3, 3), False)(d5)
+    u1 = up(512, (3, 3), False)(d4)
     u1 = layers.concatenate([u1, d4])
     u2 = up(256, (3, 3), False)(u1)
     u2 = layers.concatenate([u2, d3])
