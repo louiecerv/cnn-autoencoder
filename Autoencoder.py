@@ -12,6 +12,8 @@ def app():
     West Visayas State University"""
     st.text(text)
 
+    st.image('autoencoder.png', caption="Convolutional Neural Network Autoencoder")
+
     text = """Convolutional Neural Networks (CNNs) can be leveraged to construct 
     powerful autoencoders specifically suited for image data. These architectures 
     consist of two primary components: an encoder and a decoder.
@@ -33,8 +35,6 @@ def app():
     encoding grayscale information, into a high-dimensional output representing a colorized 
     version of the image."""
     st.write(text)
-
-    st.image('autoencoder.png', caption="Convolutional Neural Network Autoencoder")
 
     text = """Traditional image colorization techniques often necessitate significant  human 
     intervention, requiring expertise, time, and effort. However, recent advancements in deep 
