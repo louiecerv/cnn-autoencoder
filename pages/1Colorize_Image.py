@@ -263,9 +263,11 @@ def down(filters, kernel_size):
 
 def up(filters, kernel_size):
     upsample = tf.keras.models.Sequential()
+    # Key change: Added explicit addition to address missing 'add' node
+    upsample.add(layers.Add())
     upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
     upsample.add(layers.LeakyReLU())
-    upsample.add(layers.BatchNormalization())  # Added batch normalization
+    upsample.add(layers.BatchNormalization())
     return upsample
 
 def get_model():
@@ -274,15 +276,15 @@ def get_model():
     # Encoder
     d1 = down(64, (3, 3))(inputs)
     d2 = down(128, (3, 3))(d1)
-    d3 = down(256, (3, 3))(d2)  
+    d3 = down(256, (3, 3))(d2)
 
     # Bottleneck
-    bottleneck = layers.Conv2D(n_neurons, (3, 3), padding='same', activation = c_actiovation)(d3)  
+    bottleneck = layers.Conv2D(n_neurons, (3, 3), padding='same', activation=c_actiovation)(d3)
 
     # Decoder
     u1 = up(128, (3, 3))(bottleneck)
     u1 = layers.concatenate([u1, d2])
-    u2 = up(64, (3, 3))(u1)  
+    u2 = up(64, (3, 3))(u1)
     u2 = layers.concatenate([u2, d1])
     u3 = up(3, (3, 3))(u2)
 
