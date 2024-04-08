@@ -261,14 +261,14 @@ def down(filters, kernel_size):
     downsample = tf.keras.models.Sequential()
     downsample.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
     downsample.add(layers.LeakyReLU())
-    downsample.add(layers.BatchNormalization())  # Added batch normalization
+    downsample.add(layers.BatchNormalization())
     return downsample
 
 def up(filters, kernel_size):
     upsample = tf.keras.models.Sequential()
     upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
     upsample.add(layers.LeakyReLU())
-    upsample.add(layers.BatchNormalization())  # Added batch normalization
+    upsample.add(layers.BatchNormalization())
     return upsample
 
 def get_model():
@@ -280,7 +280,9 @@ def get_model():
     d3 = down(256, (3, 3))(d2)  
 
     # Bottleneck
-    bottleneck = layers.Conv2D(n_neurons, (3, 3), padding='same', activation = c_actiovation)(d3)  
+    n_neurons = 512  # Adjust this value as needed
+    c_activation = 'relu'  # Adjust activation function as needed
+    bottleneck = layers.Conv2D(n_neurons, (3, 3), padding='same', activation=c_activation)(d3)  
 
     # Decoder
     u1 = up(128, (3, 3))(bottleneck)
@@ -290,9 +292,11 @@ def get_model():
     u3 = up(3, (3, 3))(u2)
 
     # Output
-    outputs = layers.Conv2D(3, (3, 3), strides=1, padding='same', activation=o_activation)(u3)  # Using tanh
+    o_activation = 'tanh'  # Using tanh
+    outputs = layers.Conv2D(3, (3, 3), strides=1, padding='same', activation=o_activation)(u3)
 
     return tf.keras.Model(inputs=inputs, outputs=outputs)
+
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
