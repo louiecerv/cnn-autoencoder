@@ -192,6 +192,7 @@ def app():
             validation_data=(test_gray_image, test_color_image),
             callbacks=[
                 tf.keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True),
+                CustomCallback(),
                 # Consider adding learning rate scheduler (e.g., ReduceLROnPlateau)
             ]
         )
