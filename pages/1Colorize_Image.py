@@ -160,7 +160,6 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-
 def downsample(filters, kernel_size, apply_batch_normalization=True):
     model = tf.keras.Sequential()
     model.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
@@ -191,21 +190,21 @@ def get_model():
         upsample(256, (3, 3), False),
         upsample(128, (3, 3), False),
         upsample(128, (3, 3), False),
-        upsample(3, (3, 3), False)  # Changed output channels from 3 to 3
+        upsample(3, (3, 3), False)  
     ]
     x = inputs
     skip_connections = []
     for down in down_stack:
         x = down(x)
         skip_connections.append(x)
-    skip_connections = reversed(skip_connections[:-1])
+    skip_connections = skip_connections[:-1]
+    skip_connections = list(reversed(skip_connections))
     for up, skip in zip(up_stack, skip_connections):
         x = up(x)
-        x = layers.Concatenate()([x, skip])
-    output = layers.Conv2D(3, (3, 3), strides=1, padding='same')(x)  # Changed kernel size from (2, 2) to (3, 3)
+        concat = layers.Concatenate()
+        x = concat([x, skip])
+    output = layers.Conv2D(3, (1, 1), strides=1, padding='same')(x)  
     return tf.keras.Model(inputs=inputs, outputs=output)
-
-
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
