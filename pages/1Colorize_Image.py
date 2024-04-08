@@ -151,7 +151,7 @@ def app():
         # Fit the model with adjustments for efficiency
         model.fit(
             train_g, train_c,
-            epochs=100,  # Longer training to accommodate lower learning rate
+            epochs=10,  # Longer training to accommodate lower learning rate
             batch_size=32,  # Adjust based on GPU memory
             verbose=1,
             validation_data=(test_gray_image, test_color_image),  # Track validation performance
