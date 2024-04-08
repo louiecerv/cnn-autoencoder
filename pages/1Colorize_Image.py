@@ -263,8 +263,8 @@ def down(filters, kernel_size):
 
 def up(filters, kernel_size):
     upsample = tf.keras.models.Sequential()
-    # Key change: Added explicit addition to address missing 'add' node
-    upsample.add(layers.Add())
+    # Key change: Provide a placeholder input for clarity
+    upsample.add(layers.Add())  # Input will be specified later
     upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
     upsample.add(layers.LeakyReLU())
     upsample.add(layers.BatchNormalization())
@@ -282,11 +282,9 @@ def get_model():
     bottleneck = layers.Conv2D(n_neurons, (3, 3), padding='same', activation=c_actiovation)(d3)
 
     # Decoder
-    u1 = up(128, (3, 3))(bottleneck)
-    u1 = layers.concatenate([u1, d2])
-    u2 = up(64, (3, 3))(u1)
-    u2 = layers.concatenate([u2, d1])
-    u3 = up(3, (3, 3))(u2)
+    u1 = up(128, (3, 3))([bottleneck, d2])  # Provide two inputs to the Add layer
+    u2 = up(64, (3, 3))([u1, d1])  # Provide two inputs to the Add layer
+    u3 = up(3, (3, 3))(u2)  # No need for Add here, as u2 is already the result of concatenation
 
     # Output
     outputs = layers.Conv2D(3, (3, 3), strides=1, padding='same', activation=o_activation)(u3)  # Using tanh
