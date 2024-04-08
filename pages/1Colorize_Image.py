@@ -160,51 +160,34 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-def downsample(filters, kernel_size, apply_batch_normalization=True):
-    model = tf.keras.Sequential()
-    model.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
-    if apply_batch_normalization:
-        model.add(layers.BatchNormalization())
-    model.add(layers.LeakyReLU())
-    return model
 
-def upsample(filters, kernel_size, apply_dropout=False):
-    model = tf.keras.Sequential()
-    model.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
-    if apply_dropout:
-        model.add(layers.Dropout(0.2))
-    model.add(layers.LeakyReLU())
-    return model
+def down(filters, kernel_size):
+    downsample = tf.keras.layers.Conv2D(
+        filters, kernel_size, padding="same", strides=2, activation="relu"
+    )  # Combine Conv2D and ReLU for efficiency
+    return downsample
+
+def up(filters, kernel_size):
+    upsample = tf.keras.layers.Conv2DTranspose(
+        filters, kernel_size, padding="same", strides=2, activation="relu"
+    )  # Combine Conv2DTranspose and ReLU
+    return upsample
 
 def get_model():
     inputs = layers.Input(shape=[160, 160, 3])
-    down_stack = [
-        downsample(128, (3, 3), False),
-        downsample(128, (3, 3), False),
-        downsample(256, (3, 3), True),
-        downsample(512, (3, 3), True),
-        downsample(512, (3, 3), True)
-    ]
-    up_stack = [
-        upsample(512, (3, 3), False),
-        upsample(256, (3, 3), False),
-        upsample(128, (3, 3), False),
-        upsample(128, (3, 3), False),
-        upsample(3, (3, 3), False)  
-    ]
-    x = inputs
-    skip_connections = []
-    for down in down_stack:
-        x = down(x)
-        skip_connections.append(x)
-    skip_connections = skip_connections[:-1]
-    skip_connections = list(reversed(skip_connections))
-    for up, skip in zip(up_stack, skip_connections):
-        x = up(x)
-        concat = layers.Concatenate()
-        x = concat([x, skip])
-    output = layers.Conv2D(3, (1, 1), strides=1, padding='same')(x)  
+
+    # Encoder
+    d1 = down(64, (3, 3))(inputs)  # Reduce initial filters for efficiency
+    d2 = down(128, (3, 3))(d1)
+    d3 = down(256, (3, 3))(d2)  # Skip d4 for shallower architecture
+
+    # Decoder
+    u4 = up(128, (3, 3))(d3)
+    u5 = up(64, (3, 3))(u4)
+    output = layers.Conv2D(3, (2, 2), strides=1, padding="same")(u5)  # Final output layer
+
     return tf.keras.Model(inputs=inputs, outputs=output)
+
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
