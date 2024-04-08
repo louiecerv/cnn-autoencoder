@@ -130,7 +130,6 @@ def app():
         st.success("Image dataset loading completed!") 
 
         model = Autoencoder(input_shape=(160, 160, 3)) 
-        model.summary()
 
         # Capture the summary output
         with contextlib.redirect_stdout(io.StringIO()) as new_stdout:
@@ -190,8 +189,7 @@ class Autoencoder:
        u5 = self.up(3, (3, 3), False)(u4)
        u5 = layers.concatenate([u5, inputs])
        output = layers.Conv2D(3, (2, 2), strides=1, padding='same')(u5)
-
-       return output
+       return tf.keras.Model(inputs=inputs, outputs=output)
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
