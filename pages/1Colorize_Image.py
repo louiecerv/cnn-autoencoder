@@ -154,6 +154,8 @@ class Autoencoder(tf.keras.Model):
   def __init__(self):
     super(Autoencoder, self).__init__()
 
+    self.inputs = layers.Input(shape= [160,160,3])
+
     # Encoder layers
     self.down1 = self.down(128, (3, 3), False)
     self.down2 = self.down(128, (3, 3), False)
