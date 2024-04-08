@@ -140,12 +140,25 @@ def app():
 
         progress_bar = st.progress(0, text="Training the model, please wait...")
 
-        model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
-            metrics = ['acc'])
-        
-        model.fit(train_g, train_c, epochs = 50, batch_size = 50,verbose = 0)
 
-        model.evaluate(test_gray_image, test_color_image)
+        # Compile the model with optimized parameters
+        model.compile(
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),  # Lower initial learning rate
+            loss='mean_squared_error',  # More sensitive to large errors
+            metrics=[tf.keras.metrics.MeanAbsoluteError()]  # Track MAE during training
+        )
+
+        # Fit the model with adjustments for efficiency
+        model.fit(
+            train_g, train_c,
+            epochs=100,  # Longer training to accommodate lower learning rate
+            batch_size=32,  # Adjust based on GPU memory
+            verbose=1,
+            validation_data=(test_gray_image, test_color_image),  # Track validation performance
+            callbacks=[
+                tf.keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True),  # Prevent overfitting
+            ]
+        )        
 
         # update the progress bar
         for i in range(100):
