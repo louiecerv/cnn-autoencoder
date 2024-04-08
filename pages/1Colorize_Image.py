@@ -20,6 +20,10 @@ import random
 # Suppress the oneDNN warning
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
+o_activation = 'tanh'
+c_actiovation = 'relu'
+n_neurons = 512
+
 # Handle the deprecated tf.reset_default_graph warning (if using TensorFlow 2)
 if tf.version.VERSION.startswith('2'):
     from tensorflow.compat.v1 import reset_default_graph  # Use compat.v1 for deprecated function
@@ -67,16 +71,16 @@ def app():
    # Define CNN parameters    
     st.sidebar.subheader('Set the CNN Parameters')
     options = ["relu", "leaky_relu", "tanh", "elu", "selu"]
-    h_activation = st.sidebar.selectbox('Activation function for the hidden layer:', options)
+    c_activation = st.sidebar.selectbox('Activation function for the hidden layer:', options)
 
-    options = ["sigmoid", "softmax"]
+    options = ["tanh", "sigmoid", "softmax"]
     o_activation = st.sidebar.selectbox('Activation function for the output layer:', options)
 
     n_neurons = st.sidebar.slider(      
         label="Number of Neurons in the Hidden Layer:",
         min_value=32,
         max_value=1024,
-        value=512,  # Initial value
+        value=128,  # Initial value
         step=32
     )
 
@@ -265,20 +269,20 @@ def get_model():
     # Encoder
     d1 = down(64, (3, 3))(inputs)
     d2 = down(128, (3, 3))(d1)
-    d3 = down(256, (3, 3))(d2)  # Reintroduced removed layer
+    d3 = down(256, (3, 3))(d2)  
 
     # Bottleneck
-    bottleneck = layers.Conv2D(64, (3, 3), padding='same')(d3)  # Strengthened bottleneck
+    bottleneck = layers.Conv2D(n_neurons, (3, 3), padding='same', activation = c_actiovation)(d3)  
 
     # Decoder
     u1 = up(128, (3, 3))(bottleneck)
     u1 = layers.concatenate([u1, d2])
-    u2 = up(64, (3, 3))(u1)  # Reintroduced upsampling layer
+    u2 = up(64, (3, 3))(u1)  
     u2 = layers.concatenate([u2, d1])
     u3 = up(3, (3, 3))(u2)
 
     # Output
-    outputs = layers.Conv2D(3, (3, 3), strides=1, padding='same', activation='tanh')(u3)  # Using tanh
+    outputs = layers.Conv2D(3, (3, 3), strides=1, padding='same', activation=o_activation)(u3)  # Using tanh
 
     return tf.keras.Model(inputs=inputs, outputs=outputs)
 
@@ -305,7 +309,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
         mse = logs['mean_squared_error']
         
         # Update the Streamlit interface with the current epoch's output
-        st.text(f"Epoch {epoch}: loss = {loss:.4f} Mean Squared Errror = {mse:.4f}")
+        st.text(f"Epoch {epoch}: loss = {loss:.4f} Mean Squared Error = {mse:.4f}")
 
 #run the app
 if __name__ == "__main__":
