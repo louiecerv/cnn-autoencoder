@@ -168,12 +168,11 @@ def downsample(filters, kernel_size, apply_batch_normalization=True):
     model.add(layers.LeakyReLU())
     return model
 
-def upsample(filters, kernel_size, apply_dropout=False):
+def upsample(filters, kernel_size):
     model = tf.keras.Sequential()
-    model.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
+    model.add(layers.Conv2D(filters, kernel_size, padding='same'))
+    model.add(layers.UpSampling2D(2))
     model.add(layers.BatchNormalization())
-    if apply_dropout:
-        model.add(layers.Dropout(0.2))
     model.add(layers.LeakyReLU())
     return model
 
@@ -193,6 +192,8 @@ def get_model():
     
     output = layers.Conv2D(3, (3, 3), activation='sigmoid', padding='same')(u3)
     return tf.keras.Model(inputs=inputs, outputs=output)
+
+
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
