@@ -148,13 +148,13 @@ def app():
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
             loss='mean_absolute_error',  # Consider using MAE for images
-            metrics=[tf.keras.metrics.MeanAbsoluteError()]
+            metrics=[tf.keras.metrics.MeanAbsoluteError(), tf.keras.metrics.MeanSquaredError()]
         )
 
         epochs = 2
         batch_size = 32
         # Train the model with adjustments for efficiency and early stopping
-        model.fit(
+        history = model.fit(
             train_g, train_c,
             epochs=epochs,  # Adjust based on validation performance
             batch_size=batch_size,  # Adjust based on GPU memory
@@ -165,6 +165,39 @@ def app():
                 # Consider adding learning rate scheduler (e.g., ReduceLROnPlateau)
             ]
         )
+
+         # Extract loss and MAE/MSE values from history
+        train_loss = history.history['loss']
+        val_loss = history.history['val_loss']
+        train_mae = history.history['mean_absolute_error']
+        val_mae = history.history['val_mean_absolute_error']
+        train_mse = history.history['mean_squared_error']
+        val_mse = history.history['val_mean_squared_error']
+
+        # Create the figure with two side-by-side subplots
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))  # Adjust figsize for better visualization
+
+        # Plot loss on the first subplot (ax1)
+        ax1.plot(train_loss, label='Training Loss')
+        ax1.plot(val_loss, label='Validation Loss')
+        ax1.set_xlabel('Epoch')
+        ax1.set_ylabel('Loss')
+        ax1.legend()
+
+        # Plot accuracy on the second subplot (ax2)
+        ax2.plot(train_mae, 'g--', label='Training Mean Absolute Error')
+        ax2.plot(train_mse, 'g--', label='Training Mean Squared Error')
+        ax2.plot(val_mae, 'r--', label='Validation Mean Absolute Error')
+        ax2.plot(val_mse, 'r--', label='Validation Mean Squared Error')
+        ax2.set_xlabel('Epoch')
+        ax2.set_ylabel('Accuracy')
+        ax2.legend()
+
+        # Set the main title (optional)
+        fig.suptitle('Training and Validation Performance')
+
+        plt.tight_layout()  # Adjust spacing between subplots
+        st.pyplot(fig)   
 
         # update the progress bar
         for i in range(100):
@@ -232,6 +265,16 @@ def plot_3images(color, grayscale, predicted):
     axes[1].imshow(grayscale)
     axes[2].imshow(predicted)
     st.pyplot(fig)
+
+# Define a custom callback function to update the Streamlit interface
+class CustomCallback(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        # Get the current loss and accuracy metrics
+        loss = logs['loss']
+        mse = logs['mean_squared_error']
+        
+        # Update the Streamlit interface with the current epoch's output
+        st.text(f"Epoch {epoch}: loss = {loss:.4f} Mean Squared Errror = {mse:.4f}")
 
 #run the app
 if __name__ == "__main__":
