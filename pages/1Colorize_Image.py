@@ -163,7 +163,6 @@ def app():
             ]
         )
 
-
         # update the progress bar
         for i in range(100):
             # Update progress bar value
@@ -180,28 +179,39 @@ def app():
 def down(filters, kernel_size):
     downsample = tf.keras.models.Sequential()
     downsample.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
-    downsample.add(keras.layers.LeakyReLU())
+    downsample.add(layers.LeakyReLU())
+    downsample.add(layers.BatchNormalization())  # Added batch normalization
     return downsample
 
 def up(filters, kernel_size):
     upsample = tf.keras.models.Sequential()
     upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
-    upsample.add(keras.layers.LeakyReLU())
+    upsample.add(layers.LeakyReLU())
+    upsample.add(layers.BatchNormalization())  # Added batch normalization
     return upsample
 
 def get_model():
     inputs = layers.Input(shape=[80, 80, 3])
+
+    # Encoder
     d1 = down(64, (3, 3))(inputs)
     d2 = down(128, (3, 3))(d1)
-    # d3 = down(256, (3, 3))(d2)  # Removed layer
+    d3 = down(256, (3, 3))(d2)  # Reintroduced removed layer
 
-    u1 = up(128, (3, 3))(d2)
-    u1 = layers.concatenate([u1, d1])
-    # u2 = up(64, (3, 3))(u1)
-    u2 = up(3, (3, 3))(u1)  # Combined upsampling with output layer
-    u2 = layers.concatenate([u2, inputs])
-    output = layers.Conv2D(3, (2, 2), strides=1, padding='same')(u2)
-    return tf.keras.Model(inputs=inputs, outputs=output)
+    # Bottleneck
+    bottleneck = layers.Conv2D(64, (3, 3), padding='same')(d3)  # Strengthened bottleneck
+
+    # Decoder
+    u1 = up(128, (3, 3))(bottleneck)
+    u1 = layers.concatenate([u1, d2])
+    u2 = up(64, (3, 3))(u1)  # Reintroduced upsampling layer
+    u2 = layers.concatenate([u2, d1])
+    u3 = up(3, (3, 3))(u2)
+
+    # Output
+    outputs = layers.Conv2D(3, (3, 3), strides=1, padding='same', activation='tanh')(u3)  # Using tanh
+
+    return tf.keras.Model(inputs=inputs, outputs=outputs)
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
