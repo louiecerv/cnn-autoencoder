@@ -67,7 +67,7 @@ def app():
         progress_bar = st.progress(0, text="Loading the images, please wait...")
 
         # defining the size of the image
-        SIZE = 160
+        SIZE = 80
         color_img = []
         path = 'landscape Images/color'
         files = os.listdir(path)
