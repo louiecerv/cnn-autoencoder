@@ -150,60 +150,58 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-
 class Autoencoder(tf.keras.Model):
+  def __init__(self):
+    super(Autoencoder, self).__init__()
 
-    def __init__(self):
-        super(Autoencoder, self).__init__()
+    # Encoder layers
+    self.down1 = self.down(128, (3, 3), False)
+    self.down2 = self.down(128, (3, 3), False)
+    self.down3 = self.down(256, (3, 3), True)
+    self.down4 = self.down(512, (3, 3), True)
+    self.down5 = self.down(512, (3, 3), True)
 
-        # Encoder layers
-        self.down1 = self.down(128, (3, 3), False)
-        self.down2 = self.down(128, (3, 3), False)
-        self.down3 = self.down(256, (3, 3), True)
-        self.down4 = self.down(512, (3, 3), True)
-        self.down5 = self.down(512, (3, 3), True)
+    # Decoder layers
+    self.up1 = self.up(512, (3, 3), False)
+    self.up2 = self.up(256, (3, 3), False)
+    self.up3 = self.up(128, (3, 3), False)
+    self.up4 = self.up(128, (3, 3), False)
+    self.up5 = self.up(3, (3, 3), False)
 
-        # Decoder layers
-        self.up1 = self.up(512, (3, 3), False)
-        self.up2 = self.up(256, (3, 3), False)
-        self.up3 = self.up(128, (3, 3), False)
-        self.up4 = self.up(128, (3, 3), False)
-        self.up5 = self.up(3, (3, 3), False)
+    self.final_conv = layers.Conv2D(3, (2, 2), strides=1, padding='same')
 
-        self.final_conv = layers.Conv2D(3, (2, 2), strides=1, padding='same')
+  def down(self, filters, kernel_size, apply_batch_normalization=True):
+    return tf.keras.Sequential([
+        layers.Conv2D(filters, kernel_size, padding='same', strides=2),
+        layers.BatchNormalization() if apply_batch_normalization else layers.Lambda(lambda x: x),  # Use Lambda layer for identity
+        layers.LeakyReLU()
+    ])
 
-    def down(self, filters, kernel_size, apply_batch_normalization=True):
-        return tf.keras.Sequential([
-            layers.Conv2D(filters, kernel_size, padding='same', strides=2),
-            layers.BatchNormalization() if apply_batch_normalization else tf.identity,
-            layers.LeakyReLU()
-        ])
+  def up(self, filters, kernel_size, dropout=False):
+    return tf.keras.Sequential([
+        layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2),
+        layers.Dropout(0.2) if dropout else layers.Lambda(lambda x: x),  # Use Lambda layer for identity
+        layers.LeakyReLU()
+    ])
 
-    def up(self, filters, kernel_size, dropout=False):
-        return tf.keras.Sequential([
-            layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2),
-            layers.Dropout(0.2) if dropout else tf.identity,
-            layers.LeakyReLU()
-        ])
+  def call(self, inputs):
+    x = self.down1(inputs)
+    x = self.down2(x)
+    x = self.down3(x)
+    x = self.down4(x)
+    x = self.down5(x)
 
-    def call(self, inputs):
-        x = self.down1(inputs)
-        x = self.down2(x)
-        x = self.down3(x)
-        x = self.down4(x)
-        x = self.down5(x)
-
-        x = self.up1(x)
-        x = layers.concatenate([x, self.down4(inputs)])  # Skip connection
-        x = self.up2(x)
-        x = layers.concatenate([x, self.down3(inputs)])  # Skip connection
-        x = self.up3(x)
-        x = layers.concatenate([x, self.down2(inputs)])  # Skip connection
-        x = self.up4(x)
-        x = layers.concatenate([x, self.down1(inputs)])  # Skip connection
-        x = self.up5(x)
-        x = layers.concatenate([x, inputs])  # Final skip connection
-        return self.final_conv(x)
+    x = self.up1(x)
+    x = layers.concatenate([x, self.down4(inputs)])  # Skip connection
+    x = self.up2(x)
+    x = layers.concatenate([x, self.down3(inputs)])  # Skip connection
+    x = self.up3(x)
+    x = layers.concatenate([x, self.down2(inputs)])  # Skip connection
+    x = self.up4(x)
+    x = layers.concatenate([x, self.down1(inputs)])  # Skip connection
+    x = self.up5(x)
+    x = layers.concatenate([x, inputs])  # Final skip connection
+    return self.final_conv(x)
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
