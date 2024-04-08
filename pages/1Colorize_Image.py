@@ -160,10 +160,6 @@ def app():
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
-
-Here's the modified code addressing the shape mismatch:
-
-Python
 def down(filters, kernel_size):
     downsample = tf.keras.layers.Conv2D(
         filters, kernel_size, padding="same", strides=2, activation="relu"
