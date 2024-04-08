@@ -174,6 +174,7 @@ class Autoencoder(tf.keras.Model):
 
   def down(self, filters, kernel_size, apply_batch_normalization=True):
     return tf.keras.Sequential([
+        layers.Input(shape= [160,160,3]),
         layers.Conv2D(filters, kernel_size, padding='same', strides=2),
         layers.BatchNormalization() if apply_batch_normalization else layers.Lambda(lambda x: x),  # Use Lambda layer for identity
         layers.LeakyReLU()
@@ -181,6 +182,7 @@ class Autoencoder(tf.keras.Model):
 
   def up(self, filters, kernel_size, dropout=False):
     return tf.keras.Sequential([
+        layers.Input(shape= [160,160,3]),
         layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2),
         layers.Dropout(0.2) if dropout else layers.Lambda(lambda x: x),  # Use Lambda layer for identity
         layers.LeakyReLU()
