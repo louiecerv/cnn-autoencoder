@@ -168,39 +168,39 @@ def down(filters, kernel_size, apply_batch_normalization=True):
     downsample.add(keras.layers.LeakyReLU())
     return downsample
 
-def up(filters, kernel_size, dropout=False):
-    upsample = tf.keras.models.Sequential()
-    upsample.add(layers.Conv2DTranspose(filters, kernel_size, padding="same", strides=2))
-    if dropout:
-        upsample.add(layers.Dropout(0.2))  # Ensure Dropout is applied correctly
-    upsample.add(keras.layers.LeakyReLU())
-    return upsample
+def downsample(filters, kernel_size, apply_batch_normalization=True):
+    model = tf.keras.Sequential()
+    model.add(layers.Conv2D(filters, kernel_size, padding='same', strides=2))
+    if apply_batch_normalization:
+        model.add(layers.BatchNormalization())
+    model.add(layers.LeakyReLU())
+    return model
+
+def upsample(filters, kernel_size, apply_dropout=False):
+    model = tf.keras.Sequential()
+    model.add(layers.Conv2DTranspose(filters, kernel_size, padding='same', strides=2))
+    model.add(layers.BatchNormalization())
+    if apply_dropout:
+        model.add(layers.Dropout(0.2))
+    model.add(layers.LeakyReLU())
+    return model
 
 def get_model():
     inputs = layers.Input(shape=[160, 160, 3])
-
-    # Encoder
-    d1 = down(128, (3, 3), False)(inputs)
-    d2 = down(128, (3, 3), False)(d1)
-    d3 = down(256, (3, 3), True)(d2)
-    d4 = down(512, (3, 3), True)(d3)
-
-    # Decoder
-    u1 = up(512, (3, 3), False)(d4)
-    u1 = layers.concatenate([u1, d4])
-    u2 = up(256, (3, 3), False)(u1)
-    u2 = layers.concatenate([u2, d3])
-    u3 = up(128, (3, 3), False)(u2)
-    u3 = layers.concatenate([u3, d2])
-    u4 = up(128, (3, 3), False)(u3)
-    u4 = layers.concatenate([u4, d1])
-    u5 = up(3, (3, 3), False)(u4)
-
-    # Crucial modification: Remove strides and unnecessary concatenation in the output layer
-    output = layers.Conv2D(3, (2, 2), padding="same")(u5)  # No strides for final output
-
+    d1 = downsample(64, (3, 3), False)(inputs)
+    d2 = downsample(128, (3, 3))(d1)
+    d3 = downsample(256, (3, 3))(d2)
+    d4 = downsample(512, (3, 3))(d3)
+    
+    u1 = upsample(256, (3, 3))(d4)
+    u1 = layers.concatenate([u1, d3])
+    u2 = upsample(128, (3, 3))(u1)
+    u2 = layers.concatenate([u2, d2])
+    u3 = upsample(64, (3, 3))(u2)
+    u3 = layers.concatenate([u3, d1])
+    
+    output = layers.Conv2D(3, (3, 3), activation='sigmoid', padding='same')(u3)
     return tf.keras.Model(inputs=inputs, outputs=output)
-
 
 # defining function to plot images pair
 def plot_3images(color, grayscale, predicted):
