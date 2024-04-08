@@ -25,8 +25,6 @@ if tf.version.VERSION.startswith('2'):
 else:
     reset_default_graph = tf.compat.v1.reset_default_graph  # For TensorFlow 1 compatibility
 
-inputs = []
-
 # to get the files in proper order
 def sorted_alphanumeric(data):  
     convert = lambda text: int(text) if text.isdigit() else text.lower()
@@ -130,7 +128,6 @@ def app():
         # Progress bar reaches 100% after the loop completes
         st.success("Image dataset loading completed!") 
 
-        inputs = (160, 160, 3)
         model = get_model()
 
         # Capture the summary output
@@ -169,7 +166,7 @@ def up(filters, kernel_size, dropout = False):
     return upsample
 
 def get_model():
-
+    inputs = layers.Input(shape = [160, 160, 3])
     d1 = down(128,(3,3),False)(inputs)
     d2 = down(128,(3,3),False)(d1)
     d3 = down(256,(3,3),True)(d2)
