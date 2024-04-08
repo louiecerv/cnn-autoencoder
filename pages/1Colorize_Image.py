@@ -15,6 +15,7 @@ import time
 from keras import layers
 import contextlib
 import io  # Import the io module
+import random
 
 # Suppress the oneDNN warning
 os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
@@ -150,11 +151,13 @@ def app():
             metrics=[tf.keras.metrics.MeanAbsoluteError()]
         )
 
+        epochs = 2
+        batch_size = 32
         # Train the model with adjustments for efficiency and early stopping
         model.fit(
             train_g, train_c,
-            epochs=20,  # Adjust based on validation performance
-            batch_size=32,  # Adjust based on GPU memory
+            epochs=epochs,  # Adjust based on validation performance
+            batch_size=batch_size,  # Adjust based on GPU memory
             verbose=1,
             validation_data=(test_gray_image, test_color_image),
             callbacks=[
@@ -172,7 +175,9 @@ def app():
         # Progress bar reaches 100% after the loop completes
         st.success("Model training completed!")         
 
-        for i in range(50,58):
+        start_img  = random.randint(0, 1000)
+        end_img = start_img + 8
+        for i in range(start_img, end_img):
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
             plot_3images(test_color_image[i], test_gray_image[i], predicted)
 
