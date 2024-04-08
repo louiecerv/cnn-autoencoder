@@ -138,12 +138,23 @@ def app():
         # Display the summary using st.text()
         st.text(summary_str)
 
+        progress_bar = st.progress(0, text="Training the model, please wait...")
+
         model.compile(optimizer = tf.keras.optimizers.Adam(learning_rate = 0.001), loss = 'mean_absolute_error',
             metrics = ['acc'])
         
         model.fit(train_g, train_c, epochs = 50, batch_size = 50,verbose = 0)
 
         model.evaluate(test_gray_image, test_color_image)
+
+        # update the progress bar
+        for i in range(100):
+            # Update progress bar value
+            progress_bar.progress(i + 1)
+            # Simulate some time-consuming task (e.g., sleep)
+            time.sleep(0.01)
+        # Progress bar reaches 100% after the loop completes
+        st.success("Model training completed!")         
 
         for i in range(50,58):
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
