@@ -84,6 +84,14 @@ def app():
         step=32
     )
 
+    learning_rate = st.sidebar.slider(      
+        label="Learning Rate:",
+        min_value=0.001,
+        max_value=0.01,
+        value=0.001,  # Initial value
+        step=0.001,
+    )
+
     epochs = st.sidebar.slider(   
         label="Set the number epochs:",
         min_value=4,
@@ -176,9 +184,6 @@ def app():
         st.text(summary_str)
 
         progress_bar = st.progress(0, text="Training the model, please wait...")
-
-        # Hyperparameter adjustments
-        learning_rate = 0.001  # Experiment with different values
 
         # Compile the model with optimized parameters
         model.compile(
