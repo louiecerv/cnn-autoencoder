@@ -64,6 +64,38 @@ def app():
     model to see how well it performs."""
     st.write(text)
 
+   # Define CNN parameters    
+    st.sidebar.subheader('Set the CNN Parameters')
+    options = ["relu", "leaky_relu", "tanh", "elu", "selu"]
+    h_activation = st.sidebar.selectbox('Activation function for the hidden layer:', options)
+
+    options = ["sigmoid", "softmax"]
+    o_activation = st.sidebar.selectbox('Activation function for the output layer:', options)
+
+    n_neurons = st.sidebar.slider(      
+        label="Number of Neurons in the Hidden Layer:",
+        min_value=32,
+        max_value=1024,
+        value=512,  # Initial value
+        step=32
+    )
+
+    epochs = st.sidebar.slider(   
+        label="Set the number epochs:",
+        min_value=4,
+        max_value=20,
+        value=4,
+        step=1
+    )    
+
+    batch_size = st.sidebar.slider(   
+        label="Set the batch size:",
+        min_value=16,
+        max_value=64,
+        value=32,
+        step=16
+    )      
+
     if st.sidebar.button("Load Images"):
         progress_bar = st.progress(0, text="Loading the images, please wait...")
 
@@ -151,8 +183,6 @@ def app():
             metrics=[tf.keras.metrics.MeanAbsoluteError(), tf.keras.metrics.MeanSquaredError()]
         )
 
-        epochs = 2
-        batch_size = 32
         # Train the model with adjustments for efficiency and early stopping
         history = model.fit(
             train_g, train_c,
@@ -208,7 +238,7 @@ def app():
         # Progress bar reaches 100% after the loop completes
         st.success("Model training completed!")         
 
-        start_img  = random.randint(0, 1000)
+        start_img  = random.randint(0, 400)
         end_img = start_img + 8
         for i in range(start_img, end_img):
             predicted = np.clip(model.predict(test_gray_image[i].reshape(1,SIZE, SIZE,3)),0.0,1.0).reshape(SIZE, SIZE,3)
