@@ -140,25 +140,29 @@ def app():
 
         progress_bar = st.progress(0, text="Training the model, please wait...")
 
+        # Hyperparameter adjustments
+        learning_rate = 0.001  # Experiment with different values
 
         # Compile the model with optimized parameters
         model.compile(
-            optimizer=tf.keras.optimizers.Adam(learning_rate=0.0005),  # Lower initial learning rate
-            loss='mean_squared_error',  # More sensitive to large errors
-            metrics=[tf.keras.metrics.MeanAbsoluteError()]  # Track MAE during training
+            optimizer=tf.keras.optimizers.Adam(learning_rate=learning_rate),
+            loss='mean_absolute_error',  # Consider using MAE for images
+            metrics=[tf.keras.metrics.MeanAbsoluteError()]
         )
 
-        # Fit the model with adjustments for efficiency
+        # Train the model with adjustments for efficiency and early stopping
         model.fit(
             train_g, train_c,
-            epochs=10,  # Longer training to accommodate lower learning rate
+            epochs=20,  # Adjust based on validation performance
             batch_size=32,  # Adjust based on GPU memory
             verbose=1,
-            validation_data=(test_gray_image, test_color_image),  # Track validation performance
+            validation_data=(test_gray_image, test_color_image),
             callbacks=[
-                tf.keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True),  # Prevent overfitting
+                tf.keras.callbacks.EarlyStopping(patience=10, restore_best_weights=True),
+                # Consider adding learning rate scheduler (e.g., ReduceLROnPlateau)
             ]
-        )        
+        )
+
 
         # update the progress bar
         for i in range(100):
